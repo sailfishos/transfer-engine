@@ -103,10 +103,8 @@ public:
 
     QString currentDateTime()
     {
-        // TODO: Make sure this can handle time correctly
-        // Let's use ISO8601 strings
-        QDateTime dt = QDateTime::currentDateTime();
-        return dt.toString("yyyy-MM-ddThh:mm:ss");
+        QDateTime dt = QDateTime::currentDateTimeUtc();
+        return dt.toString(Qt::ISODate);
     }
 
     bool createDatabaseSchema()
