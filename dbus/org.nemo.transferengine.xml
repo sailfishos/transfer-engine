@@ -79,6 +79,12 @@
             <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QList &lt; TransferDBRecord &gt; "/>
         </method>
 
+        # Get a list of active transfers
+        <method name="activeTransfers">
+            <arg name="records" type="a(iidss)" direction="out" />
+            <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QList &lt; TransferDBRecord &gt; "/>
+        </method>
+
         # Get a list of transfer methods such as FB, Twitter, BT, NFC, etc
         <method name="transferMethods">
             <arg name="methods" type="a(ssssasi)" direction="out" />
@@ -115,6 +121,8 @@
         </signal>
 
         <signal name="transfersChanged" />
+
+        <signal name="activeTransfersChanged" />
 
         <signal name="transferMethodListChanged" />
    </interface>

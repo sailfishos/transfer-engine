@@ -14,7 +14,10 @@ packagesExist(qt5-boostable) {
 LIBS += -L../lib -lnemotransferengine-qt5
 
 # generate adaptor code
-system(qdbusxml2cpp -c TransferEngineAdaptor -a transferengineadaptor.h:transferengineadaptor.cpp -i metatypedeclarations.h ../dbus/org.nemo.transferengine.xml)
+DBUS_ADAPTORS += transferengine
+transferengine.files = ../dbus/org.nemo.transferengine.xml
+transferengine.header_flags = -i metatypedeclarations.h -i transferengine.h -l TransferEngine -c TransferEngineAdaptor
+transferengine.source_flags = -l TransferEngine -c TransferEngineAdaptor
 
 CONFIG += link_pkgconfig
 PKGCONFIG += accounts-qt5 nemonotifications-qt5
@@ -49,12 +52,10 @@ PRE_TARGETDEPS += ts engineering_english
 
 # Input
 SOURCES += main.cpp \
-    transferengineadaptor.cpp \
     dbmanager.cpp \
     transferengine.cpp
 
 HEADERS += \
-    transferengineadaptor.h \
     dbmanager.h \
     transferengine.h \
     transferengine_p.h

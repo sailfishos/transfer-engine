@@ -13,6 +13,7 @@ systemd.path  = /usr/lib/systemd/user/
 OTHER_FILES += \
     rpm/*.spec \
     nemo-transfer-engine.conf \
+    dbus/* \
     doc/src/* \
     doc/config/*
 
