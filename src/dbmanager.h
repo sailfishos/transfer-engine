@@ -1,6 +1,6 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
+** Copyright (C) 2013-2016 Jolla Ltd.
 ** Contact: Marko Mattila <marko.mattila@jollamobile.com>
 ** All rights reserved.
 **
@@ -63,7 +63,13 @@ public:
 
     bool clearTransfers();
 
+    int transferCount() const;
+
+    int activeTransferCount() const;
+
     QList<TransferDBRecord> transfers() const;
+
+    QList<TransferDBRecord> activeTransfers() const;
 
     TransferEngineData::TransferType transferType(int key) const;
 
@@ -75,6 +81,7 @@ public:
 
 private:
     DbManager();
+    QList<TransferDBRecord> transfers(TransferEngineData::TransferStatus status) const;
     DbManagerPrivate *d_ptr;
     Q_DECLARE_PRIVATE(DbManager)
 };

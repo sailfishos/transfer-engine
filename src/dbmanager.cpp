@@ -1,6 +1,6 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
+** Copyright (C) 2013-2016 Jolla Ltd.
 ** Contact: Marko Mattila <marko.mattila@jollamobile.com>
 ** All rights reserved.
 **
@@ -613,16 +613,61 @@ bool DbManager::clearTransfers()
     return true;
 }
 
+int DbManager::transferCount() const
+{
+    QSqlQuery query;
+    if (query.exec(QString("SELECT COUNT(transfer_id) FROM transfers"))) {
+        query.next();
+        return query.value(0).toInt();
+    } else {
+        qWarning() << "DbManager::transferCount: Failed to execute SQL query!";
+        return -1;
+    }
+}
+
+int DbManager::activeTransferCount() const
+{
+    QSqlQuery query;
+    if (query.exec(QString("SELECT COUNT(transfer_id) FROM transfers WHERE status='%1'").arg(TransferEngineData::TransferStarted))) {
+        query.next();
+        return query.value(0).toInt();
+    } else {
+        qWarning() << "DbManager::activeTransferCount: Failed to execute SQL query!";
+        return -1;
+    }
+}
+
 /*!
     Returns all the transfers from the database. This method doesn't fetch all the fields from all the
     tables, instead it returns what is required to fill fields in TransferDBRecord class.
  */
 QList<TransferDBRecord> DbManager::transfers() const
 {
+    return transfers(TransferEngineData::Unknown);
+}
+
+/*!
+    Returns all the active transfers from the database. This method doesn't fetch all the fields from all the
+    tables, instead it returns what is required to fill fields in TransferDBRecord class.
+ */
+QList<TransferDBRecord> DbManager::activeTransfers() const
+{
+    return transfers(TransferEngineData::TransferStarted);
+}
+
+/*!
+    Returns all the transfers from the database which have the specified status. This method doesn't fetch all the fields from all the
+    tables, instead it returns what is required to fill fields in TransferDBRecord class.
+ */
+QList<TransferDBRecord> DbManager::transfers(TransferEngineData::TransferStatus status) const
+{
     // TODO: This should order the result based on timestamp
     QList<TransferDBRecord> records;
+    QString queryStr = (status == TransferEngineData::Unknown) ?
+        QString("SELECT * FROM transfers ORDER BY transfer_id DESC") :
+        QString("SELECT * FROM transfers WHERE status='%1' ORDER BY transfer_id DESC").arg(status);
     QSqlQuery query;
-    if (!query.exec("SELECT * FROM transfers ORDER BY transfer_id DESC")) {
+    if (!query.exec(queryStr)) {
         qWarning() << "DbManager::transfers: Failed to execute SQL query. Couldn't get list of transfers!";
         return records;
     }

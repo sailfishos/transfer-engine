@@ -1,6 +1,6 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
+** Copyright (C) 2013-2016 Jolla Ltd.
 ** Contact: Marko Mattila <marko.mattila@jollamobile.com>
 ** All rights reserved.
 **
@@ -29,7 +29,7 @@
 #include "transferplugininterface.h"
 #include "mediaitem.h"
 #include "dbmanager.h"
-#include "transferengineadaptor.h"
+#include "transferengine_adaptor.h"
 #include "transfertypes.h"
 #include "transferplugininfo.h"
 
@@ -195,8 +195,12 @@ void TransferEnginePrivate::exitSafely()
 
 void TransferEnginePrivate::delayedExitSafely()
 {
-    qDebug() << "Stopping transfer engine";
-    qApp->exit();
+    if (getenv("TRANSFER_ENGINE_KEEP_RUNNING")) {
+        qDebug() << "Keeping transfer engine running";
+    } else {
+        qDebug() << "Stopping transfer engine";
+        qApp->exit();
+    }
 }
 
 void TransferEnginePrivate::enabledPluginsCheck()
@@ -285,6 +289,9 @@ void TransferEnginePrivate::recoveryCheck()
             record.status == TransferEngineData::NotStarted) {
             if (DbManager::instance()->updateTransferStatus(record.transfer_id, TransferEngineData::TransferInterrupted)) {
                 emit q->statusChanged(record.transfer_id, TransferEngineData::TransferInterrupted);
+                if (record.status == TransferEngineData::TransferStarted) {
+                    emit q_ptr->activeTransfersChanged(); // It's not active anymore
+                }
             }
         }
     }
@@ -1041,6 +1048,7 @@ void TransferEngine::startTransfer(int transferId)
         d->m_activityMonitor->newActivity(transferId);
         DbManager::instance()->updateTransferStatus(transferId, TransferEngineData::TransferStarted);
         emit statusChanged(transferId, TransferEngineData::TransferStarted);
+        emit activeTransfersChanged();
     } else {
         qWarning() << "TransferEngine::startTransfer: could not start transfer";
     }
@@ -1159,6 +1167,8 @@ void TransferEngine::finishTransfer(int transferId, int status, const QString &r
             }
         }
 
+        emit activeTransfersChanged(); // Assume that the transfer was active
+
         if (notify) {
             emit transfersChanged();
         }
@@ -1198,6 +1208,16 @@ QList<TransferDBRecord> TransferEngine::transfers()
 }
 
 /*!
+    DBus adaptor calls this method to fetch a list of active transfers. This method returns QList<TransferDBRecord>.
+ */
+QList<TransferDBRecord> TransferEngine::activeTransfers()
+{
+    Q_D(TransferEngine);
+    d->exitSafely();
+    return DbManager::instance()->activeTransfers();
+}
+
+/*!
     DBus adaptor calls this method to fetch a list of transfer methods. This method returns QList<TransferMethodInfo>.
 
     Transfer methods are basically a list of share plugins installed to the system.
@@ -1216,10 +1236,15 @@ void TransferEngine::clearTransfers()
 {    
     Q_D(TransferEngine);
     d->exitSafely();
-    if (DbManager::instance()->clearTransfers()) {
-        emit transfersChanged();
-    } else {
-        qWarning() << "TransferEngine::clearTransfers: Failed to clear finished transfers!";
+    const int count = DbManager::instance()->transferCount();
+    if (count > 0) {
+        const int active = DbManager::instance()->activeTransferCount();
+        if (DbManager::instance()->clearTransfers()) {
+            if (active > 0) {
+                emit activeTransfersChanged();
+            }
+            emit transfersChanged();
+        }
     }
 }
 

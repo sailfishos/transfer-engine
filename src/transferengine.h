@@ -1,6 +1,6 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
+** Copyright (C) 2013-2016 Jolla Ltd.
 ** Contact: Marko Mattila <marko.mattila@jollamobile.com>
 ** All rights reserved.
 **
@@ -83,6 +83,8 @@ public Q_SLOTS:
 
     QList<TransferDBRecord> transfers();
 
+    QList<TransferDBRecord> activeTransfers();
+
     QList <TransferMethodInfo> transferMethods();
 
     void clearTransfers();
@@ -102,6 +104,7 @@ Q_SIGNALS:
 
     void transfersChanged();
 
+    void activeTransfersChanged();
 
 private:
     TransferEnginePrivate *d_ptr;
