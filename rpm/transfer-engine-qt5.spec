@@ -1,10 +1,10 @@
 Name: nemo-transferengine-qt5
-Version: 0.1.1
+Version: 0.1.5
 Release: 0
 Summary: Transfer Engine for uploading media content and tracking transfers.
 Group: System Environment/Daemon
 License: LGPLv2.1
-URL: https://github.com/nemomobile/transfer-engine
+URL: https://git.merproject.org/mer-core/transfer-engine
 Source0: %{name}-%{version}.tar.gz
 BuildRequires: pkgconfig(Qt5Core)
 BuildRequires: pkgconfig(Qt5DBus)
