@@ -1249,6 +1249,18 @@ void TransferEngine::clearTransfers()
 }
 
 /*!
+    DBus adaptor calls this method to remove a finished, canceled or interrupted transfer from the database.
+ */
+void TransferEngine::clearTransfer(int transferId)
+{
+    Q_D(TransferEngine);
+    d->exitSafely();
+    if (DbManager::instance()->clearTransfer(transferId)) {
+        emit transfersChanged();
+    }
+}
+
+/*!
     DBus adaptor calls this method to cancel an existing transfer with a \a transferId.
 
     If the transfer is Upload, then this method calls MediaTransferInterface instance's

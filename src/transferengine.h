@@ -89,6 +89,8 @@ public Q_SLOTS:
 
     void clearTransfers();
 
+    void clearTransfer(int transferId);
+
     void cancelTransfer(int transferId);
 
     void enableNotifications(bool enable);

@@ -1,6 +1,6 @@
 /****************************************************************************************
 **
-** Copyright (C) 2014 Jolla Ltd.
+** Copyright (C) 2014-2016 Jolla Ltd.
 ** Contact: Marko Mattila <marko.mattila@jolla.com>
 ** All rights reserved.
 **
@@ -131,6 +131,13 @@ void TransferModel::clearTransfers()
 {
     if (m_client) {
         m_client->clearTransfers();
+    }
+}
+
+void TransferModel::clearTransfer(int transferId)
+{
+    if (m_client) {
+        m_client->clearTransfer(transferId);
     }
 }
 

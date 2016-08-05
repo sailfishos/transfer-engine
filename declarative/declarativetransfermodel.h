@@ -1,6 +1,6 @@
 /****************************************************************************************
 **
-** Copyright (C) 2014 Jolla Ltd.
+** Copyright (C) 2014-2016 Jolla Ltd.
 ** Contact: Marko Mattila <marko.mattila@jolla.com>
 ** All rights reserved.
 **
@@ -83,6 +83,7 @@ public:
 
     Q_INVOKABLE QJSValue get(int index) const;
     Q_INVOKABLE void clearTransfers();
+    Q_INVOKABLE void clearTransfer(int transferId);
 
     QHash<int, QByteArray> roleNames() const;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
