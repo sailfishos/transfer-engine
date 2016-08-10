@@ -613,6 +613,25 @@ bool DbManager::clearTransfers()
     return true;
 }
 
+bool DbManager::clearTransfer(int key)
+{
+    QSqlQuery query;
+    TransferEngineData::TransferStatus status = transferStatus(key);
+    switch (status) {
+    case TransferEngineData::TransferFinished:
+    case TransferEngineData::TransferCanceled:
+    case TransferEngineData::TransferInterrupted:
+        if (query.exec(QString("DELETE FROM transfers WHERE transfer_id='%1';").arg(QString::number(key)))) {
+            return true;
+        }
+        qWarning() << "Failed to execute SQL query. Couldn't delete transfer" << key;
+        return false;
+    default:
+        qWarning() << "Not clearing transfer" << key << "because its status is" << status;
+        return false;
+    }
+}
+
 int DbManager::transferCount() const
 {
     QSqlQuery query;

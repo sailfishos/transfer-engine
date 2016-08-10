@@ -99,6 +99,10 @@
             <arg name="transferId" type="i" direction="in"/>
         </method>
 
+        <method name="clearTransfer">
+            <arg name="transferId" type="i" direction="in"/>
+        </method>
+
         # enable or disable notifications
         <method name="enableNotifications">
             <arg name="enable" type="b" direction="in"/>

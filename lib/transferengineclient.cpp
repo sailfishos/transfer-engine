@@ -1,6 +1,6 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
+** Copyright (C) 2013-2016 Jolla Ltd.
 ** Contact: Marko Mattila <marko.mattila@jollamobile.com>
 ** All rights reserved.
 **
@@ -364,6 +364,15 @@ void TransferEngineClient::clearTransfers()
 {
     Q_D(TransferEngineClient);
     d->m_client->clearTransfers();
+}
+
+/*!
+    Private method for QML interface to clear a finished, canceled or interrupted event.
+ */
+void TransferEngineClient::clearTransfer(int transferId)
+{
+    Q_D(TransferEngineClient);
+    d->m_client->clearTransfer(transferId);
 }
 
 /*!

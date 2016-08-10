@@ -61,6 +61,8 @@ public:
 
     bool clearFailedTransfers(int excludeKey, TransferEngineData::TransferType type);
 
+    bool clearTransfer(int key);
+
     bool clearTransfers();
 
     int transferCount() const;

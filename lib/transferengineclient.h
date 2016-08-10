@@ -1,6 +1,6 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
+** Copyright (C) 2013-2016 Jolla Ltd.
 ** Contact: Marko Mattila <marko.mattila@jollamobile.com>
 ** All rights reserved.
 **
@@ -84,6 +84,7 @@ public:
 private:
     void cbCancelTransfer(int transferId);
     void cbRestartTransfer(int transferId);
+    void clearTransfer(int transferId);
     void clearTransfers();
     void enableNotifications(bool enable);
     bool notificationsEnabled() const;
