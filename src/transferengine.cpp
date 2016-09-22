@@ -780,12 +780,12 @@ TransferEngine::TransferEngine(QObject *parent) :
     TransferDBRecord::registerType();
 
     QDBusConnection connection = QDBusConnection::sessionBus();
-    if (!connection.registerService("org.nemo.transferengine")) {
-        qFatal("DBUS service already taken. Kill the other instance first.");
-    }
-
     if (!connection.registerObject("/org/nemo/transferengine", this)) {
         qFatal("Could not register object \'/org/nemo/transferengine\'");
+    }
+
+    if (!connection.registerService("org.nemo.transferengine")) {
+        qFatal("DBUS service already taken. Kill the other instance first.");
     }
 
     new TransferEngineAdaptor(this);
