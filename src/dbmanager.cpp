@@ -175,7 +175,7 @@ public:
 
         QSqlQuery query;
         if (!query.exec(queryStr)) {
-            qWarning() << "DbManager::callback: Failed to execute SQL query. Couldn't update the progress!"
+            qWarning() << "DbManager::callback: Failed to execute SQL query for user_version."
                        << query.lastError().text() << ": "
                        << query.lastError().databaseText();
             return -1;
@@ -292,7 +292,7 @@ QStringList DbManager::callback(int key) const
     QStringList result;
     QSqlQuery query;
     if (!query.exec(queryStr)) {
-        qWarning() << "DbManager::callback: Failed to execute SQL query. Couldn't update the progress!"
+        qWarning() << "DbManager::callback: Failed to execute SQL query. Couldn't get callback!"
                    << query.lastError().text() << ": "
                    << query.lastError().databaseText();
         return result;
@@ -730,7 +730,7 @@ TransferEngineData::TransferType DbManager::transferType(int key) const
 
     QSqlQuery query;
     if (!query.exec(queryStr)) {
-        qWarning() << "DbManager::transferType: Failed to execute SQL query. Couldn't update the progress!"
+        qWarning() << "DbManager::transferType: Failed to execute SQL query. Couldn't get transfer type!"
                    << query.lastError().text() << ": "
                    << query.lastError().databaseText();
         return TransferEngineData::Undefined;
@@ -757,7 +757,7 @@ TransferEngineData::TransferStatus DbManager::transferStatus(int key) const
 
     QSqlQuery query;
     if (!query.exec(queryStr)) {
-        qWarning() << "DbManager::transferStatus: Failed to execute SQL query. Couldn't update the progress!"
+        qWarning() << "DbManager::transferStatus: Failed to execute SQL query. Couldn't get transfer status!"
                    << query.lastError().text() << ": "
                    << query.lastError().databaseText();
         return TransferEngineData::Unknown;
