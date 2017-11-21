@@ -363,8 +363,7 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
             qWarning() << "TransferEnginePrivate::sendNotification: unknown state";
             break;
         }
-    } else {
-    if (status == TransferEngineData::TransferInterrupted) {
+    } else if (status == TransferEngineData::TransferInterrupted) {
         category = TRANSFER_ERROR_EVENT_CATEGORY;
 
         switch (type) {
@@ -391,15 +390,14 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
         summary = fileName;
         previewSummary = summary;
         previewBody = body;
-    } else {
-    if (status == TransferEngineData::TransferCanceled) {
+    } else if (status == TransferEngineData::TransferCanceled) {
         // Exit, no banners or events when user has canceled a transfer
 
         // Remove any existing notification
         if (existing) {
             existing->close();
         }
-    }}}
+    }
 
     if (!category.isEmpty()) {
         Notification notification;
