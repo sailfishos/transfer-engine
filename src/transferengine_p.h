@@ -29,7 +29,7 @@
 
 #include <QObject>
 #include <QMap>
-#include <QSettings>
+#include <QVariantList>
 
 #include "mediatransferinterface.h"
 #include "transfermethodinfo.h"
@@ -141,9 +141,9 @@ private:
     QFileSystemWatcher *m_fileWatcher;
     QTimer *m_fileWatcherTimer;
     QTimer *m_delayedExitTimer;
-    QSettings m_settings;
     ClientActivityMonitor *m_activityMonitor;
     TransferEngine *q_ptr;
+    QVariantList m_defaultActions;
     Q_DECLARE_PUBLIC(TransferEngine)
 };
 

@@ -39,6 +39,7 @@
 #include <QDBusMessage>
 #include <QFileSystemWatcher>
 #include <QTimer>
+#include <QSettings>
 
 #include <notification.h>
 
@@ -66,7 +67,7 @@ TransferEngineSignalHandler * TransferEngineSignalHandler::instance()
 
 void TransferEngineSignalHandler::signalHandler(int signal)
 {
-    if(signal == SIGUSR1) {
+    if (signal == SIGUSR1) {
         QMetaObject::invokeMethod(TransferEngineSignalHandler::instance(),
                                   "exitSafely",
                                   Qt::AutoConnection);
@@ -145,7 +146,6 @@ void ClientActivityMonitor::checkActivity()
 
 TransferEnginePrivate::TransferEnginePrivate(TransferEngine *parent):
     m_notificationsEnabled(true),
-    m_settings(CONFIG_PATH, QSettings::IniFormat),
     q_ptr(parent)
 {
     m_fileWatcherTimer = new QTimer(this);
@@ -175,6 +175,24 @@ TransferEnginePrivate::TransferEnginePrivate(TransferEngine *parent):
     // Monitor expired transfers and cleanup them if required
     m_activityMonitor = new ClientActivityMonitor(this);
     connect(m_activityMonitor, SIGNAL(transfersExpired(QList<int>)), this, SLOT(cleanupExpiredTransfers(QList<int>)));
+
+    QSettings settings(CONFIG_PATH, QSettings::IniFormat);
+
+    if (settings.status() != QSettings::NoError) {
+        qWarning() << Q_FUNC_INFO << "Failed to read settings!" << settings.status();
+    } else {
+        settings.beginGroup("transfers");
+        const QString service = settings.value("service").toString();
+        const QString path = settings.value("path").toString();
+        const QString iface = settings.value("interface").toString();
+        const QString method = settings.value("method").toString();
+        settings.endGroup();
+
+        if (!service.isEmpty() && !path.isEmpty() && !iface.isEmpty() && !method.isEmpty()) {
+            m_defaultActions << Notification::remoteAction("default", "", service, path, iface, method)
+                             << Notification::remoteAction("app", "", service, path, iface, method);
+        }
+    }
 }
 
 void TransferEnginePrivate::pluginDirChanged()
@@ -429,20 +447,8 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
             notification.setReplacesId(notificationId);
         }
 
-        if (m_settings.status() != QSettings::NoError) {
-            qWarning() << Q_FUNC_INFO << "Failed to read settings!" << m_settings.status();
-        } else {
-            m_settings.beginGroup("transfers");
-            const QString service = m_settings.value("service").toString();
-            const QString path = m_settings.value("path").toString();
-            const QString iface = m_settings.value("interface").toString();
-            const QString method = m_settings.value("method").toString();
-            m_settings.endGroup();
-
-            if (!service.isEmpty() && !path.isEmpty() && !iface.isEmpty() && !method.isEmpty()) {
-                notification.setRemoteActions(QVariantList() << Notification::remoteAction("default", "", service, path, iface, method)
-                                              << Notification::remoteAction("app", "", service, path, iface, method));
-            }
+        if (!m_defaultActions.isEmpty()) {
+            notification.setRemoteActions(m_defaultActions);
         }
 
         //: Group name for notifications of successful transfers
