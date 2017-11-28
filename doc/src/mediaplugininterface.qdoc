@@ -41,9 +41,9 @@
     TransferEngine supports C++ share plugins. Each share plugin must implement couple of well defined interfaces:
 
     \list
-        \o \l TransferPluginInterface Provides interfaces to access required objects to start sharing.
-        \o \l MediaTransferInterface  Implements the actual sharing functionality
-        \o \l TransferPluginInfo      Provides information about plugin status such as is it ready.
+        \li \l TransferPluginInterface Provides interfaces to access required objects to start sharing.
+        \li \l MediaTransferInterface  Implements the actual sharing functionality
+        \li \l TransferPluginInfo      Provides information about plugin status such as is it ready.
     \endlist
 
     TransferPluginInterface provides information to the TransferEngine via this interface.

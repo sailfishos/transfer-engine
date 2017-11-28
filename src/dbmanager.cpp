@@ -277,11 +277,11 @@ DbManager::~DbManager()
 
     In a case there is a DBus callback, then QStringList contains the following items:
     \list
-        \o service
-        \o path
-        \o interface
-        \o cancel method name
-        \o restart method name
+        \li service
+        \li path
+        \li interface
+        \li cancel method name
+        \li restart method name
     \endlist
  */
 QStringList DbManager::callback(int key) const
@@ -349,11 +349,11 @@ int DbManager::createMetadataEntry(int key, const QString &title, const QString 
 
     The callback is a dbus interface so it must contain the following attributes:
     \list
-        \o \a service e.g. com.jolla.myapp
-        \o \a path e.g. /com/jolla/myapp
-        \o \a interface e.g. com.jolla.myapp
-        \o \a cancelMethod The name of the cancel method
-        \o \a restartMethod The name of the restart method
+        \li \a service e.g. com.jolla.myapp
+        \li \a path e.g. /com/jolla/myapp
+        \li \a interface e.g. com.jolla.myapp
+        \li \a cancelMethod The name of the cancel method
+        \li \a restartMethod The name of the restart method
     \endlist
 
     This method returns a key of the created callback record in a callback table or -1 on

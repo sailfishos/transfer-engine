@@ -78,11 +78,11 @@ CallbackInterface::CallbackInterface()
     Construct CallbackInterface instance to provide callback information to the TransferEngineClient. Setup
     arguments as:
     \list
-        \o \a server  e.g. "com.jolla.myapp"
-        \o \a path   e.g. "/com/jolla/myapp"
-        \o \a interface  e.g. "com.jolla.myapp"
-        \o \a cancelMethod   Cancel method name e.g. "cancelSync"
-        \o \a restartMethod Restart method name e.g. "restartSync"
+        \li \a server  e.g. "com.jolla.myapp"
+        \li \a path   e.g. "/com/jolla/myapp"
+        \li \a interface  e.g. "com.jolla.myapp"
+        \li \a cancelMethod   Cancel method name e.g. "cancelSync"
+        \li \a restartMethod Restart method name e.g. "restartSync"
     \endlist
  */
 CallbackInterface::CallbackInterface(const QString &server, const QString &path, const QString &interface,
@@ -222,9 +222,9 @@ TransferEngineClient::~TransferEngineClient()
     Create a download event to the TransferEngine. This only creates and entry, and client
     needs still call:
     \list
-        \o \l TransferEngineClient::startTransfer()
-        \o \l TransferEngineClient::updateTransferProgress()
-        \o \l TransferEngineClient::finishTransfer()
+        \li \l TransferEngineClient::startTransfer()
+        \li \l TransferEngineClient::updateTransferProgress()
+        \li \l TransferEngineClient::finishTransfer()
     \endlist
 
     \sa createSyncEvent(), startTransfer(), updateTransferProgress(), finishTransfer()
@@ -325,9 +325,9 @@ void TransferEngineClient::updateTransferProgress(int transferId, qreal progress
     Finalize the transfer with \a transferId. There are three options for finalizing the transfer by setting
     the \a status parameter value:
     \list
-        \o \l TransferEngineClient::TransferFinished - success
-        \o \l TransferEngineClient::TransferCanceled - user cancelation
-        \o \l TransferEngineClient::TransferInterrupted - an error
+        \li \l TransferEngineClient::TransferFinished - success
+        \li \l TransferEngineClient::TransferCanceled - user cancelation
+        \li \l TransferEngineClient::TransferInterrupted - an error
     \endlist
 
     If the client wants to provide reason for finishing the transfer, it's possible to provide \a reason
@@ -388,7 +388,7 @@ void TransferEngineClient::enableNotifications(bool enable)
 /*!
     Private method for QML interface.
 
-    \returns true if notifications are enabled, otherwise false is returned.
+    Returns true if notifications are enabled, otherwise false is returned.
  */
 bool TransferEngineClient::notificationsEnabled() const
 {

@@ -63,10 +63,10 @@ share functionality implementation depends on the client e.g. if it's HW specifi
 such as Facebook. Each plugin must implement or use the following interface:
 
 \list
-    \o \l {TransferPluginInterface} Share plugin must implement this interface
-    \o \l {MediaTransferInterface} Share plugin must implement this interface
-    \o \l {TransferPluginInfo} Share plugin must provide information about plugin using this class
-    \o \l {TransferMethodInfo} Share plugin must provide information about e.g. accounts using this class
+    \li \l {TransferPluginInterface} Share plugin must implement this interface
+    \li \l {MediaTransferInterface} Share plugin must implement this interface
+    \li \l {TransferPluginInfo} Share plugin must provide information about plugin using this class
+    \li \l {TransferMethodInfo} Share plugin must provide information about e.g. accounts using this class
 \endlist
 
 \section3 Client API
@@ -77,14 +77,14 @@ example Transfer UI and client side sharing interface on top of it. The Transfer
 be used by clients who want to inform Nemo Transfer Engine of ongoing Sync or Downloads.
 
 \list
-    \o DBus API - see org.nemomobile.transferengine.xml. For the client side it will generate TransferEngineInterface
+    \li DBus API - see org.nemomobile.transferengine.xml. For the client side it will generate TransferEngineInterface
     class which can be used directly.
-    \o TransferEngineClient - The convenience API to create Sync and Download events.
+    \li TransferEngineClient - The convenience API to create Sync and Download events.
 \endlist
 
 \section3 Reference
 \list
-    \o \l {Nemo Transfer Engine Reference}
+    \li \l {Nemo Transfer Engine Reference}
 \endlist
 
 */

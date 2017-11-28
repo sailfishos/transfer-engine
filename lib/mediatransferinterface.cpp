@@ -60,10 +60,10 @@ public:
     each share plugin. The subclass of this class is resposible of providing:
 
     \list
-        \o Status information of the sharing
-        \o Progress of the sharing
-        \o Information, if cancel and restart actions are supported
-        \o Starting and/or canceling the sharing
+        \li Status information of the sharing
+        \li Progress of the sharing
+        \li Information, if cancel and restart actions are supported
+        \li Starting and/or canceling the sharing
     \endlist
 
 

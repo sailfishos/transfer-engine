@@ -717,9 +717,9 @@ void TransferEnginePrivate::callbackCall(int transferId, CallbackMethodType meth
 
     TransferEngine is the central place for:
     \list
-        \o Sharing - Provides requires plugin interfaces for share plugins
-        \o Downloads - Provides an API to create Download entries
-        \o Syncs - Provides an API to create Sync entries
+        \li Sharing - Provides requires plugin interfaces for share plugins
+        \li Downloads - Provides an API to create Download entries
+        \li Syncs - Provides an API to create Sync entries
     \endlist
 
     For Downloads and Syncs, the Transfer Engine acts only a place to keep track of these operations.
@@ -827,10 +827,10 @@ TransferEngine::~TransferEngine()
 
     TransferEngine handles the following user defined data automatically and stores them to the database:
     \list
-        \o "title" Title for the media
-        \o "description" Description for the media
-        \o "accountId" The ID of the account which is used for sharing. See qt-accounts for more details.
-        \o "scalePercent" The scale percent e.g. downscale image to 50% from original before uploading.
+        \li "title" Title for the media
+        \li "description" Description for the media
+        \li "accountId" The ID of the account which is used for sharing. See qt-accounts for more details.
+        \li "scalePercent" The scale percent e.g. downscale image to 50% from original before uploading.
     \endlist
 
     In practice this method instantiates a share plugin with \a serviceId and passes a MediaItem instance filled
@@ -912,15 +912,15 @@ int TransferEngine::uploadMediaItemContent(const QVariantMap &content,
     of type 'Download'.
 
     \list
-        \o \a displayName  The name for Download which may be used by the UI displaying the download
-        \o \a applicationIcon The application icon of the application created the download
-        \o \a serviceIcon The service icon, which provides the file to be downloaded
-        \o \a filePath The filePath e.g. url to the file to be downloaded
-        \o \a mimeType the MimeType of the file to be downloaded
-        \o \a expectedFileSize The file size of the file to be downloaded
-        \o \a callback QStringList containing DBus callback information such as: service, path and interface
-        \o \a cancelMethod The name of the cancel callback method, which DBus callback provides
-        \o \a restartMethod The name of the restart callback method, which DBus callback provides
+        \li \a displayName  The name for Download which may be used by the UI displaying the download
+        \li \a applicationIcon The application icon of the application created the download
+        \li \a serviceIcon The service icon, which provides the file to be downloaded
+        \li \a filePath The filePath e.g. url to the file to be downloaded
+        \li \a mimeType the MimeType of the file to be downloaded
+        \li \a expectedFileSize The file size of the file to be downloaded
+        \li \a callback QStringList containing DBus callback information such as: service, path and interface
+        \li \a cancelMethod The name of the cancel callback method, which DBus callback provides
+        \li \a restartMethod The name of the restart callback method, which DBus callback provides
     \endlist
 
     This method returns the transfer id of the created Download transfer. Note that this method only
@@ -972,12 +972,12 @@ int TransferEngine::createDownload(const QString &displayName,
     of type 'Download'.
 
     \list
-        \o \a displayName  The name for download which may be used by the UI displaying the download
-        \o \a applicationIcon The application icon of the application created the download
-        \o \a serviceIcon The service icon, which provides the file to be downloaded
-        \o \a callback QStringList containing DBus callback information such as: service, path and interface
-        \o \a cancelMethod The name of the cancel callback method, which DBus callback provides
-        \o \a restartMethod The name of the restart callback method, which DBus callback provides
+        \li \a displayName  The name for download which may be used by the UI displaying the download
+        \li \a applicationIcon The application icon of the application created the download
+        \li \a serviceIcon The service icon, which provides the file to be downloaded
+        \li \a callback QStringList containing DBus callback information such as: service, path and interface
+        \li \a cancelMethod The name of the cancel callback method, which DBus callback provides
+        \li \a restartMethod The name of the restart callback method, which DBus callback provides
     \endlist
 
     This method returns the transfer id of the created Download transfer. Note that this method only
