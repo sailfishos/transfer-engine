@@ -52,9 +52,11 @@
 #define ACTIVITY_MONITOR_TIMEOUT 1*60*1000 // 1 minute in ms
 #define TRANSFER_EXPIRATION_THRESHOLD 3*60 // 3 minutes in seconds
 
-#define TRANSFER_EVENT_CATEGORY "x-nemo.transfer"
-#define TRANSFER_COMPLETE_EVENT_CATEGORY "x-nemo.transfer.complete"
-#define TRANSFER_ERROR_EVENT_CATEGORY "x-nemo.transfer.error"
+#define TRANSFER_EVENT_CATEGORY "transfer"
+#define TRANSFER_COMPLETE_EVENT_CATEGORY "transfer.complete"
+#define TRANSFER_ERROR_EVENT_CATEGORY "transfer.error"
+
+#define TRANSFER_PROGRESS_HINT "x-nemo-progress"
 
 TransferEngineSignalHandler * TransferEngineSignalHandler::instance()
 {
@@ -299,7 +301,9 @@ void TransferEnginePrivate::recoveryCheck()
 
 void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType type,
                                              TransferEngineData::TransferStatus status,
-                                             const QString &fileName)
+                                             qreal progress,
+                                             const QString &fileName,
+                                             int transferId)
 {
     if (!m_notificationsEnabled || fileName.isEmpty()) {
         return;
@@ -310,6 +314,10 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
     QString summary;
     QString previewBody;
     QString previewSummary;
+    bool useProgress = false;
+    Notification::Urgency urgency = Notification::Normal;
+    QString appIcon = QStringLiteral("icon-lock-information");
+    QString icon = QStringLiteral("x-nemo-icon=icon-lock-transfer");
 
     // TODO: explicit grouping of transfer notifications is now removed, as grouping
     // will now be performed by lipstick.  We may need to reinstate group summary
@@ -325,18 +333,8 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
     // - For downloads
     // - For failed uploads, downloads and syncs
 
-    QList<QObject *> nList = Notification::notifications();
-    Notification *existing = 0;
 
-    foreach (QObject *obj, nList) {
-        if (Notification *n = qobject_cast<Notification *>(obj)) {
-            if (n->summary() == fileName || n->previewSummary() == fileName) {
-                // This existing notification is for this file
-                existing = n;
-                break;
-            }
-        }
-    }
+    int notificationId = DbManager::instance()->notificationId(transferId);
 
     if (status == TransferEngineData::TransferFinished) {
         switch(type) {
@@ -363,8 +361,11 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
             qWarning() << "TransferEnginePrivate::sendNotification: unknown state";
             break;
         }
+
     } else if (status == TransferEngineData::TransferInterrupted) {
-        category = TRANSFER_ERROR_EVENT_CATEGORY;
+        urgency = Notification::Critical;
+        appIcon = QStringLiteral("icon-lock-information");
+        icon.clear();
 
         switch (type) {
         case TransferEngineData::Upload:
@@ -390,37 +391,58 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
         summary = fileName;
         previewSummary = summary;
         previewBody = body;
-    } else if (status == TransferEngineData::TransferCanceled) {
-        // Exit, no banners or events when user has canceled a transfer
 
-        // Remove any existing notification
-        if (existing) {
-            existing->close();
+    } else if (status == TransferEngineData::TransferStarted) {
+        if (type == TransferEngineData::Upload || type == TransferEngineData::Download) {
+            category = TRANSFER_EVENT_CATEGORY;
+
+            if (type == TransferEngineData::Upload) {
+                //: Notification for ongoing upload
+                //% "File uploading"
+                body = qtTrId("transferengine-no-file-uploading");
+            } else {
+                //: Notification for ongoing file download
+                //% "File downloading"
+                body = qtTrId("transferengine-no-file-downloading");
+            }
+
+            summary = fileName;
+
+            if (progress > 0)
+                useProgress = true;
         }
+
+    } else if (status == TransferEngineData::TransferCanceled && notificationId > 0) {
+        // Exit, no banners or events when user has canceled a transfer
+        // Remove any existing notification
+        Notification notification;
+        notification.setReplacesId(notificationId);
+        notification.close();
+        DbManager::instance()->setNotificationId(transferId, 0);
+        notificationId = 0;
     }
 
     if (!category.isEmpty()) {
         Notification notification;
 
-        if (!existing) {
-            // Create a new notification
-            if (m_settings.status() != QSettings::NoError) {
-                qWarning() << Q_FUNC_INFO << "Failed to read settings!" << m_settings.status();
-            } else {
-                m_settings.beginGroup("transfers");
-                const QString service = m_settings.value("service").toString();
-                const QString path = m_settings.value("path").toString();
-                const QString iface = m_settings.value("interface").toString();
-                const QString method = m_settings.value("method").toString();
-                m_settings.endGroup();
+        if (notificationId > 0) {
+            notification.setReplacesId(notificationId);
+        }
 
-                if (!service.isEmpty() && !path.isEmpty() && !iface.isEmpty() && !method.isEmpty()) {
-                    notification.setRemoteActions(QVariantList() << Notification::remoteAction("default", "", service, path, iface, method)
-                                                                 << Notification::remoteAction("app", "", service, path, iface, method));
-                }
+        if (m_settings.status() != QSettings::NoError) {
+            qWarning() << Q_FUNC_INFO << "Failed to read settings!" << m_settings.status();
+        } else {
+            m_settings.beginGroup("transfers");
+            const QString service = m_settings.value("service").toString();
+            const QString path = m_settings.value("path").toString();
+            const QString iface = m_settings.value("interface").toString();
+            const QString method = m_settings.value("method").toString();
+            m_settings.endGroup();
+
+            if (!service.isEmpty() && !path.isEmpty() && !iface.isEmpty() && !method.isEmpty()) {
+                notification.setRemoteActions(QVariantList() << Notification::remoteAction("default", "", service, path, iface, method)
+                                              << Notification::remoteAction("app", "", service, path, iface, method));
             }
-
-            existing = &notification;
         }
 
         //: Group name for notifications of successful transfers
@@ -430,17 +452,24 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
         //% "Warnings"
         const QString errorsGroup(qtTrId("transferengine-notification_errors_group"));
 
-        // Update the notification
-        existing->setCategory(category);
-        existing->setAppName(category == TRANSFER_ERROR_EVENT_CATEGORY ? errorsGroup : transfersGroup);
-        existing->setSummary(summary);
-        existing->setBody(body);
-        existing->setPreviewSummary(previewSummary);
-        existing->setPreviewBody(previewBody);
-        existing->publish();
-    }
+        notification.setCategory(category);
+        notification.setAppName(category == TRANSFER_ERROR_EVENT_CATEGORY ? errorsGroup : transfersGroup);
+        notification.setSummary(summary);
+        notification.setBody(body);
+        notification.setPreviewSummary(previewSummary);
+        notification.setPreviewBody(previewBody);
+        notification.setUrgency(urgency);
 
-    qDeleteAll(nList);
+        if (useProgress) {
+            notification.setHintValue(TRANSFER_PROGRESS_HINT, static_cast<double>(progress));
+        }
+        notification.publish();
+        int newId = notification.replacesId();
+
+        if (newId != notificationId) {
+            DbManager::instance()->setNotificationId(transferId, newId);
+        }
+    }
 }
 
 int TransferEnginePrivate::uploadMediaItem(MediaItem *mediaItem,
@@ -449,7 +478,7 @@ int TransferEnginePrivate::uploadMediaItem(MediaItem *mediaItem,
 {
     Q_Q(TransferEngine);
 
-    if (muif == 0) {
+    if (mediaItem == 0) {
         qWarning() << "TransferEngine::uploadMediaItem invalid MediaItem";
         return -1;
     }
@@ -586,7 +615,7 @@ void TransferEnginePrivate::uploadItemStatusChanged(MediaTransferInterface::Tran
         // If the flow ends up here, we are not interested in any signals the same object
         // might emit. Let's just disconnect them.
         muif->disconnect();
-        sendNotification(type, tStatus, mediaFileOrResourceName(muif->mediaItem()));
+        sendNotification(type, tStatus, muif->progress(), mediaFileOrResourceName(muif->mediaItem()), key);
         ok = DbManager::instance()->updateTransferStatus(key, tStatus);
         if (m_plugins.remove(muif) == 0) {
             qWarning() << "TransferEnginePrivate::uploadItemStatusChanged: Failed to remove media upload object from the map!";
@@ -623,7 +652,7 @@ void TransferEnginePrivate::updateProgress(qreal progress)
 
     m_activityMonitor->newActivity(key);
     Q_Q(TransferEngine);
-    emit q->progressChanged(key, progress);
+    q->updateTransferProgress(key, progress);
 }
 
 void TransferEnginePrivate::pluginInfoReady()
@@ -672,7 +701,6 @@ TransferEngineData::TransferType TransferEnginePrivate::transferType(int transfe
         return m_keyTypeCache.value(transferId);
     }
 }
-
 
 void TransferEnginePrivate::callbackCall(int transferId, CallbackMethodType method)
 {
@@ -1145,7 +1173,7 @@ void TransferEngine::finishTransfer(int transferId, int status, const QString &r
         transferStatus == TransferEngineData::TransferCanceled ||
         transferStatus == TransferEngineData::TransferInterrupted) {
         DbManager::instance()->updateTransferStatus(transferId, transferStatus);
-        d->sendNotification(type, transferStatus, fileName);
+        d->sendNotification(type, transferStatus, DbManager::instance()->transferProgress(transferId), fileName, transferId);
         d->m_activityMonitor->activityFinished(transferId);
         emit statusChanged(transferId, status);
 
@@ -1183,13 +1211,25 @@ void TransferEngine::updateTransferProgress(int transferId, double progress)
     d->exitSafely();
 
     TransferEngineData::TransferType type = d->transferType(transferId);
-    if (type == TransferEngineData::Undefined || type == TransferEngineData::Upload) {
+    if (type != TransferEngineData::Download && type != TransferEngineData::Upload) {
         return;
     }
 
+    MediaItem *mediaItem = DbManager::instance()->mediaItem(transferId);
+    if (!mediaItem) {
+        qWarning() << "TransferEngine::finishTransfer: Failed to fetch MediaItem";
+        return;
+    }
+    QString fileName = d->mediaFileOrResourceName(mediaItem);
+
+    int oldProgressPercentage = DbManager::instance()->transferProgress(transferId) * 100;
     if (DbManager::instance()->updateProgress(transferId, progress)) {
         d->m_activityMonitor->newActivity(transferId);
         emit progressChanged(transferId, progress);
+
+        if (oldProgressPercentage != (progress * 100)) {
+            d->sendNotification(type, DbManager::instance()->transferStatus(transferId), progress, fileName, transferId);
+        }
     } else {
          qWarning() << "TransferEngine::updateTransferProgress: Failed to update progress for " << transferId;
     }
@@ -1313,7 +1353,7 @@ void TransferEngine::cancelTransfer(int transferId)
     }
 }
 /*!
-    DBus adaptor calls this method to enable or disable transfer speicific notifications
+    DBus adaptor calls this method to enable or disable transfer specific notifications
     based on \a enable argument.
 */
 void TransferEngine::enableNotifications(bool enable)

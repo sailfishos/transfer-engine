@@ -105,7 +105,9 @@ public:
     void recoveryCheck();
     void sendNotification(TransferEngineData::TransferType type,
                           TransferEngineData::TransferStatus status,
-                          const QString &fileName);
+                          qreal progress,
+                          const QString &fileName,
+                          int transferId);
     int uploadMediaItem(MediaItem *mediaItem,
                         MediaTransferInterface *muif,
                         const QVariantMap &userData);

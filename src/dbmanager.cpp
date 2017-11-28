@@ -81,7 +81,8 @@
                         "strip_metadata INTEGER,\n" \
                         "scale_percent REAL,\n" \
                         "cancel_supported INTEGER,\n" \
-                        "restart_supported INTEGER\n" \
+                        "restart_supported INTEGER,\n" \
+                        "notification_id INTEGER\n" \
                         ");\n"
 
 // Cascade trigger i.e. when transfer is removed and it has metadata or callbacks, this
@@ -95,7 +96,7 @@
                         "END;\n"
 
 // Update the following version if database schema changes.
-#define USER_VERSION 1
+#define USER_VERSION 2
 #define PRAGMA_USER_VERSION   QString("PRAGMA user_version=%1").arg(USER_VERSION)
 
 class DbManagerPrivate {
@@ -242,11 +243,28 @@ DbManager::DbManager():
 
     // Create database schema if db didn't exist
     if (!dbExists) {
-        if(!d->createDatabaseSchema()) {
+        if (!d->createDatabaseSchema()) {
             qCritical("DbManager::DbManager: Failed to create DB schema. Can't continue!");
         }
     } else {
         // Database exists, check the schema version
+        if (d->userVersion() == 1) {
+            // For this we get away with DeclarativeTransferModel directly reading database without
+            // update because notification_id is the last column
+            QSqlQuery query;
+            if (query.exec("ALTER TABLE transfers ADD COLUMN notification_id INTEGER")) {
+                qWarning() << "Extended transfers table";
+
+                if (!query.exec(PRAGMA_USER_VERSION)) {
+                    qWarning() << "DbManager pragma user_version update:"
+                               << query.lastError().text() << ":" << query.lastError().databaseText();
+                }
+            } else {
+                qWarning() << "Failed to extend transfers table!"
+                           << query.lastError().text() << ":" << query.lastError().databaseText();
+            }
+        }
+
         if (d->userVersion() != USER_VERSION) {
             d->deleteOldTables();
             d->createDatabaseSchema();
@@ -408,9 +426,11 @@ int DbManager::createTransferEntry(const MediaItem *mediaItem)
     Q_D(DbManager);
     QSqlQuery query;
     query.prepare("INSERT INTO transfers (transfer_type, timestamp, status, progress, display_name, application_icon, thumbnail_icon, "
-                  "service_icon, url, resource_name, mime_type, file_size, plugin_id, account_id, strip_metadata, scale_percent, cancel_supported, restart_supported)"
-                  "VALUES (:transfer_type, :timestamp, :status, :progress, :display_name, :application_icon, :thumbnail_icon, :service_icon, "
-                  ":url, :resource_name, :mime_type, :file_size, :plugin_id, :account_id, :strip_metadata, :scale_percent, :cancel_supported, :restart_supported)");
+                  "  service_icon, url, resource_name, mime_type, file_size, plugin_id, account_id, strip_metadata, scale_percent, "
+                  "  cancel_supported, restart_supported, notification_id)"
+                  "VALUES (:transfer_type, :timestamp, :status, :progress, :display_name, :application_icon, :thumbnail_icon, "
+                  "  :service_icon, :url, :resource_name, :mime_type, :file_size, :plugin_id, :account_id, :strip_metadata, :scale_percent, "
+                  "  :cancel_supported, :restart_supported, :notification_id)");
     query.bindValue(":transfer_type",       mediaItem->value(MediaItem::TransferType));
     query.bindValue(":status",              TransferEngineData::NotStarted);
     query.bindValue(":timestamp",           d->currentDateTime());
@@ -429,9 +449,10 @@ int DbManager::createTransferEntry(const MediaItem *mediaItem)
     query.bindValue(":scale_percent",       mediaItem->value(MediaItem::ScalePercent));
     query.bindValue(":cancel_supported",    mediaItem->value(MediaItem::CancelSupported));
     query.bindValue(":restart_supported",   mediaItem->value(MediaItem::RestartSupported));
+    query.bindValue(":notification_id",     0);
 
     if (!query.exec()) {
-        qWarning() << "DbManager::createTransfereEntry: Failed to execute SQL query. Couldn't create an entry!"
+        qWarning() << "DbManager::createTransferEntry: Failed to execute SQL query. Couldn't create an entry!"
                    << query.lastError().text() << ": "
                    << query.lastError().databaseText();
         return -1;
@@ -771,6 +792,66 @@ TransferEngineData::TransferStatus DbManager::transferStatus(int key) const
         return TransferEngineData::Unknown;
     }
 }
+
+/*!
+     Returns the transfer progress or -1 if unavailable
+ */
+qreal DbManager::transferProgress(int key) const
+{
+    QString queryStr = QString("SELECT progress FROM transfers WHERE transfer_id='%1';").arg(QString::number(key));
+
+    QSqlQuery query;
+    if (!query.exec(queryStr)) {
+        qWarning() << "DbManager::transferStatus: Failed to execute SQL query. Couldn't get the progress!"
+                   << query.lastError().text() << ": "
+                   << query.lastError().databaseText();
+        return -1;
+    }
+
+    if (query.isActive() && query.isSelect()) {
+        query.first();
+        return static_cast<qreal>(query.value(0).toReal());
+    } else {
+        return -1;
+    }
+}
+
+int DbManager::notificationId(int key)
+{
+    QString queryStr = QString("SELECT notification_id FROM transfers WHERE transfer_id='%1';").arg(QString::number(key));
+
+    QSqlQuery query;
+    if (!query.exec(queryStr)) {
+        qWarning() << "DbManager::transferStatus: Failed to execute SQL query. Couldn't get the notification id!"
+                   << query.lastError().text() << ": "
+                   << query.lastError().databaseText();
+        return 0;
+    }
+
+    if (query.isActive() && query.isSelect()) {
+        query.first();
+        return static_cast<qreal>(query.value(0).toReal());
+    } else {
+        return 0;
+    }
+}
+
+bool DbManager::setNotificationId(int key, int notificationId)
+{
+    QString queryStr = QString("UPDATE transfers SET notification_id='%1' WHERE transfer_id='%2';")
+            .arg(QString::number(notificationId)).arg(QString::number(key));
+
+    QSqlQuery query;
+    if (!query.exec(queryStr)) {
+        qWarning() << "Failed to execute SQL query. Couldn't update the notification id!"
+                   << query.lastError().text() << ": "
+                   << query.lastError().databaseText();
+        return false;
+    }
+    query.finish();
+    return true;
+}
+
 /*!
     Reads the callback method names from the database for the transfer with \a key. The method names are set to the
     output arguments \a cancelMethod and \a restartMethod.

@@ -182,7 +182,7 @@ QVariant TransferMethodInfo::value(int index) const
         return accountId;
     case AccountIcon:
         return accountIcon;
-   default:
+    default:
         return QVariant();
     }
 }

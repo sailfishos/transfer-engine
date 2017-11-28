@@ -53,7 +53,6 @@ public:
 
     MediaItem *mediaItem();
 
-
     virtual QString displayName() const = 0;
     virtual QUrl serviceIcon() const = 0;
     virtual bool cancelEnabled() const = 0;
