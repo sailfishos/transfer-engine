@@ -88,7 +88,13 @@
         # Get a list of transfer methods such as FB, Twitter, BT, NFC, etc
         <method name="transferMethods">
             <arg name="methods" type="a(ssssasi)" direction="out" />
-            <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QList &lt; TransferMethodInfo &gt; "/>
+            <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QList &lt; TransferMethodInfoDeprecated &gt; "/>
+        </method>
+
+        # Get a list of transfer methods such as FB, Twitter, BT, NFC, etc
+        <method name="transferMethods2">
+            <arg name="methods" type="a(ssssasusa{sv})" direction="out" />
+            <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QList &lt; TransferMethodInfo&gt; "/>
         </method>
 
         # clear all unfinished transfers

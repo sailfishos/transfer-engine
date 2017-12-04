@@ -85,7 +85,8 @@ public Q_SLOTS:
 
     QList<TransferDBRecord> activeTransfers();
 
-    QList <TransferMethodInfo> transferMethods();
+    QList <TransferMethodInfoDeprecated> transferMethods();
+    QList <TransferMethodInfo> transferMethods2();
 
     void clearTransfers();
 

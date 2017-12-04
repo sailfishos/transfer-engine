@@ -33,6 +33,8 @@
 
 Q_DECLARE_METATYPE(TransferDBRecord)
 Q_DECLARE_METATYPE(QList<TransferDBRecord>)
+Q_DECLARE_METATYPE(TransferMethodInfoDeprecated)
+Q_DECLARE_METATYPE(QList<TransferMethodInfoDeprecated>)
 Q_DECLARE_METATYPE(TransferMethodInfo)
 Q_DECLARE_METATYPE(QList<TransferMethodInfo>)
 

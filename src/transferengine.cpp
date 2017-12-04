@@ -526,7 +526,6 @@ QList <TransferMethodInfo> TransferEnginePrivate::enabledPlugins() const
     return m_enabledPlugins;
 }
 
-
 MediaTransferInterface *TransferEnginePrivate::loadPlugin(const QString &pluginId) const
 {
     QPluginLoader loader;
@@ -776,6 +775,7 @@ TransferEngine::TransferEngine(QObject *parent) :
     QObject(parent),
     d_ptr(new TransferEnginePrivate(this))
 {
+    TransferMethodInfoDeprecated::registerType();
     TransferMethodInfo::registerType();
     TransferDBRecord::registerType();
 
@@ -1222,7 +1222,27 @@ QList<TransferDBRecord> TransferEngine::activeTransfers()
 
     Transfer methods are basically a list of share plugins installed to the system.
  */
-QList <TransferMethodInfo> TransferEngine::transferMethods()
+QList <TransferMethodInfoDeprecated> TransferEngine::transferMethods()
+{
+    Q_D(TransferEngine);
+    d->exitSafely();
+
+    QList <TransferMethodInfo> newPlugins = d->enabledPlugins();
+    QList <TransferMethodInfoDeprecated> oldPlugins;
+    for (auto info : newPlugins) {
+        TransferMethodInfoDeprecated oldInfo;
+        oldInfo.displayName     = info.displayName;
+        oldInfo.userName        = info.userName;
+        oldInfo.methodId        = info.methodId;
+        oldInfo.shareUIPath     = info.shareUIPath;
+        oldInfo.capabilitities  = info.capabilitities;
+        oldInfo.accountId       = info.accountId;
+        oldPlugins << oldInfo;
+    }
+    return oldPlugins;
+}
+
+QList <TransferMethodInfo> TransferEngine::transferMethods2()
 {
     Q_D(TransferEngine);
     d->exitSafely();

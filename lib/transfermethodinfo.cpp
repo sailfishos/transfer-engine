@@ -46,6 +46,7 @@
         info.displayName     = QLatin1String("Bluetooth");
         info.userName        = "";
         info.accountId       = "";
+        info.accountIcon     = QLatin1String("image://theme/icon-m-bluetooth");
         info.methodId        = QLatin1String("bluetooth");
         info.shareUIPath     = SHARE_UI_PATH + QLatin1String("/BluetoothShareUI.qml");
         info.capabilitities  = capabilities;
@@ -62,6 +63,7 @@
     \value UserName User name e.g. mike.myers@gmail.com
     \value MethodId The plugin Id of the share plugin e.g. "bluetooth"
     \value AccountId The Id the account, needed in a case of multiple accounts
+    \value AccountIcon The url of the icon representing the account
     \value ShareUIPath The path to the share ui QML plugin. This QML file will be loaded by the share UI
     \value Capabilities A list of supported mimetypes
 */
@@ -69,13 +71,7 @@
 /*!
     Creates an instance of TransferMethodInfo.
  */
-TransferMethodInfo::TransferMethodInfo():
-    displayName(),
-    userName(),
-    methodId(),
-    shareUIPath(),
-    capabilitities(),
-    accountId()
+TransferMethodInfo::TransferMethodInfo()
 {
 }
 
@@ -90,6 +86,8 @@ TransferMethodInfo &TransferMethodInfo::operator=(const TransferMethodInfo &othe
     shareUIPath     = other.shareUIPath;
     capabilitities  = other.capabilitities;
     accountId       = other.accountId;
+    accountIcon     = other.accountIcon;
+    hints           = other.hints;
     return *this;
 }
 
@@ -102,7 +100,9 @@ TransferMethodInfo::TransferMethodInfo(const TransferMethodInfo &other):
     methodId(other.methodId),
     shareUIPath(other.shareUIPath),
     capabilitities(other.capabilitities),
-    accountId(other.accountId)
+    accountId(other.accountId),
+    accountIcon(other.accountIcon),
+    hints(other.hints)
 {
 
 }
@@ -126,7 +126,9 @@ QDBusArgument &operator<<(QDBusArgument &argument, const TransferMethodInfo &inf
              << info.methodId
              << info.shareUIPath
              << info.capabilitities
-             << info.accountId;
+             << info.accountId
+             << info.accountIcon
+             << info.hints;
 
     argument.endStructure();
     return argument;
@@ -143,7 +145,9 @@ const QDBusArgument &operator>>(const QDBusArgument &argument, TransferMethodInf
              >> info.methodId
              >> info.shareUIPath
              >> info.capabilitities
-             >> info.accountId;
+             >> info.accountId
+             >> info.accountIcon
+             >> info.hints;
 
     argument.endStructure();
     return argument;
@@ -176,7 +180,41 @@ QVariant TransferMethodInfo::value(int index) const
         return capabilitities;
     case AccountId:
         return accountId;
+    case AccountIcon:
+        return accountIcon;
    default:
         return QVariant();
     }
+}
+
+QDBusArgument &operator<<(QDBusArgument &argument, const TransferMethodInfoDeprecated &info)
+{
+    argument.beginStructure();
+    argument << info.displayName
+             << info.userName
+             << info.methodId
+             << info.shareUIPath
+             << info.capabilitities
+             << info.accountId;
+    argument.endStructure();
+    return argument;
+}
+const QDBusArgument &operator>>(const QDBusArgument &argument, TransferMethodInfoDeprecated &info)
+{
+    argument.beginStructure();
+    argument >> info.displayName
+             >> info.userName
+             >> info.methodId
+             >> info.shareUIPath
+             >> info.capabilitities
+             >> info.accountId;
+
+    argument.endStructure();
+    return argument;
+}
+
+void TransferMethodInfoDeprecated::registerType()
+{
+    qDBusRegisterMetaType<TransferMethodInfoDeprecated>();
+    qDBusRegisterMetaType<QList<TransferMethodInfoDeprecated> >();
 }
