@@ -46,6 +46,7 @@
         info.displayName     = QLatin1String("Bluetooth");
         info.userName        = "";
         info.accountId       = "";
+        info.accountIcon     = QLatin1String("image://theme/icon-m-bluetooth");
         info.methodId        = QLatin1String("bluetooth");
         info.shareUIPath     = SHARE_UI_PATH + QLatin1String("/BluetoothShareUI.qml");
         info.capabilitities  = capabilities;
@@ -75,7 +76,8 @@ TransferMethodInfo::TransferMethodInfo():
     methodId(),
     shareUIPath(),
     capabilitities(),
-    accountId()
+    accountId(),
+    accountIcon()
 {
 }
 
@@ -90,6 +92,7 @@ TransferMethodInfo &TransferMethodInfo::operator=(const TransferMethodInfo &othe
     shareUIPath     = other.shareUIPath;
     capabilitities  = other.capabilitities;
     accountId       = other.accountId;
+    accountIcon     = other.accountIcon;
     return *this;
 }
 
@@ -102,7 +105,8 @@ TransferMethodInfo::TransferMethodInfo(const TransferMethodInfo &other):
     methodId(other.methodId),
     shareUIPath(other.shareUIPath),
     capabilitities(other.capabilitities),
-    accountId(other.accountId)
+    accountId(other.accountId),
+    accountIcon(other.accountIcon)
 {
 
 }
@@ -126,7 +130,8 @@ QDBusArgument &operator<<(QDBusArgument &argument, const TransferMethodInfo &inf
              << info.methodId
              << info.shareUIPath
              << info.capabilitities
-             << info.accountId;
+             << info.accountId
+             << info.accountIcon;
 
     argument.endStructure();
     return argument;
@@ -143,7 +148,8 @@ const QDBusArgument &operator>>(const QDBusArgument &argument, TransferMethodInf
              >> info.methodId
              >> info.shareUIPath
              >> info.capabilitities
-             >> info.accountId;
+             >> info.accountId
+             >> info.accountIcon;
 
     argument.endStructure();
     return argument;
@@ -176,6 +182,8 @@ QVariant TransferMethodInfo::value(int index) const
         return capabilitities;
     case AccountId:
         return accountId;
+    case AccountIcon:
+        return accountIcon;
    default:
         return QVariant();
     }

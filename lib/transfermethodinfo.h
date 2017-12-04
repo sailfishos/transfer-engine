@@ -39,8 +39,9 @@ public:
     enum TransferMethodInfoField {
         DisplayName,     // e.g. Facebook
         UserName,        // e.g. mike.myers@gmail.com
-        MethodId,        // Id of the plugin
-        AccountId,       // Id the account, needed in a case of multiple accounts
+        MethodId,        // id of the plugin
+        AccountId,       // id the account, needed in a case of multiple accounts
+        AccountIcon,     // account icon source
         ShareUIPath,     // path to the share ui QML plugin
         Capabilities     // list of supported mimetypes
     };
@@ -64,6 +65,7 @@ public:
     QString shareUIPath;
     QStringList capabilitities;
     quint32 accountId;
+    QString accountIcon;
 };
 
 #endif // TRANSFERMETHODINFO_H
