@@ -30,6 +30,21 @@
 #include <QtGlobal>
 #include <QtDBus/QtDBus>
 
+class TransferMethodInfoDeprecated
+{
+public:
+    friend QDBusArgument &operator<<(QDBusArgument &argument, const TransferMethodInfoDeprecated &record);
+    friend const QDBusArgument &operator>>(const QDBusArgument &argument, TransferMethodInfoDeprecated &record);
+
+    static void registerType();
+
+    QString displayName;
+    QString userName;
+    QString methodId;
+    QString shareUIPath;
+    QStringList capabilitities;
+    quint32 accountId;
+};
 
 class TransferMethodInfo
 {
@@ -39,8 +54,9 @@ public:
     enum TransferMethodInfoField {
         DisplayName,     // e.g. Facebook
         UserName,        // e.g. mike.myers@gmail.com
-        MethodId,        // Id of the plugin
-        AccountId,       // Id the account, needed in a case of multiple accounts
+        MethodId,        // id of the plugin
+        AccountId,       // id the account, needed in a case of multiple accounts
+        AccountIcon,     // account icon source url
         ShareUIPath,     // path to the share ui QML plugin
         Capabilities     // list of supported mimetypes
     };
@@ -57,13 +73,15 @@ public:
 
     QVariant value(int index) const;
 
-
     QString displayName;
     QString userName;
     QString methodId;
     QString shareUIPath;
     QStringList capabilitities;
     quint32 accountId;
+    QString accountIcon;
+    QVariantHash hints;
+
 };
 
 #endif // TRANSFERMETHODINFO_H
