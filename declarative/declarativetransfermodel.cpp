@@ -416,7 +416,7 @@ QSqlDatabase TransferModel::database()
 	TransferDatabase database;
         database.setDatabaseName(absDbPath);
         database.setConnectOptions(QLatin1String("QSQLITE_OPEN_READONLY")); // sanity check
-	thread_database.setLocalData(database);
+        thread_database.setLocalData(database);
     }
 
     QSqlDatabase &database = thread_database.localData();

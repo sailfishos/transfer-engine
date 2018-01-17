@@ -32,9 +32,7 @@
 
 class TransferDBRecord
 {
-
 public:
-
     enum TransferDBRecordField {
         TransferID = 0,
         TransferType,

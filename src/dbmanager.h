@@ -77,6 +77,11 @@ public:
 
     TransferEngineData::TransferStatus transferStatus(int key) const;
 
+    qreal transferProgress(int key) const;
+
+    int notificationId(int key);
+    bool setNotificationId(int key, int notificationId);
+
     bool callbackMethods(int key, QString &cancelMethod, QString &restartMethod) const;
 
     MediaItem * mediaItem(int key) const;

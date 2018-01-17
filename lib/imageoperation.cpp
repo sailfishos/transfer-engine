@@ -38,9 +38,9 @@
 
     This class is meant to be used by share plugins. It can be used for:
     \list
-        \o Removing image metadata
-        \o Scaling image
-        \o Create a temp files from the image paths
+        \li Removing image metadata
+        \li Scaling image
+        \li Create a temp files from the image paths
     \endlist
 */
 
