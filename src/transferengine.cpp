@@ -383,6 +383,7 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
     } else if (status == TransferEngineData::TransferInterrupted) {
         urgency = Notification::Critical;
         appIcon = QStringLiteral("icon-lock-information");
+        category = TRANSFER_ERROR_EVENT_CATEGORY;
         icon.clear();
 
         switch (type) {
