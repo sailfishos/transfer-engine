@@ -335,7 +335,7 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
     bool useProgress = false;
     Notification::Urgency urgency = Notification::Normal;
     QString appIcon = QStringLiteral("icon-lock-information");
-    QString icon = QStringLiteral("x-nemo-icon=icon-lock-transfer");
+    QString icon = QStringLiteral("icon-lock-transfer");
 
     // TODO: explicit grouping of transfer notifications is now removed, as grouping
     // will now be performed by lipstick.  We may need to reinstate group summary
@@ -383,6 +383,7 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
     } else if (status == TransferEngineData::TransferInterrupted) {
         urgency = Notification::Critical;
         appIcon = QStringLiteral("icon-lock-information");
+        category = TRANSFER_ERROR_EVENT_CATEGORY;
         icon.clear();
 
         switch (type) {
@@ -465,6 +466,10 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
         notification.setPreviewSummary(previewSummary);
         notification.setPreviewBody(previewBody);
         notification.setUrgency(urgency);
+
+        if (!icon.isEmpty()) {
+            notification.setIcon(icon);
+        }
 
         if (useProgress) {
             notification.setHintValue(TRANSFER_PROGRESS_HINT, static_cast<double>(progress));
