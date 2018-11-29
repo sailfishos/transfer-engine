@@ -41,7 +41,6 @@ class TransferEngine : public QObject
 {
     Q_OBJECT
 public:
-
     explicit TransferEngine(QObject *parent = 0);
     ~TransferEngine();
 

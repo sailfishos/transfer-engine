@@ -31,8 +31,8 @@
 #include <QUrl>
 #include "transfertypes.h"
 
-
 class CallbackInterfacePrivate;
+
 class CallbackInterface {
 public:
     CallbackInterface();
@@ -51,7 +51,6 @@ class TransferEngineClient : public QObject
 {
     Q_OBJECT
 public:
-
     enum Status {
         TransferFinished = TransferEngineData::TransferFinished,
         TransferCanceled = TransferEngineData::TransferCanceled,
@@ -60,8 +59,6 @@ public:
 
     explicit TransferEngineClient(QObject *parent = 0);
     ~TransferEngineClient();
-
-
 
     int createDownloadEvent(const QString &displayName,
                             const QUrl &applicationIcon,

@@ -104,15 +104,10 @@ TransferMethodInfo::TransferMethodInfo(const TransferMethodInfo &other):
     accountIcon(other.accountIcon),
     hints(other.hints)
 {
-
 }
 
-/*!
-    Destroys TransferMethodInfo instance.
-*/
 TransferMethodInfo::~TransferMethodInfo()
 {
-
 }
 
 /*!
@@ -199,6 +194,7 @@ QDBusArgument &operator<<(QDBusArgument &argument, const TransferMethodInfoDepre
     argument.endStructure();
     return argument;
 }
+
 const QDBusArgument &operator>>(const QDBusArgument &argument, TransferMethodInfoDeprecated &info)
 {
     argument.beginStructure();

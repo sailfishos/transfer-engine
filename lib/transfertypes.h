@@ -29,7 +29,6 @@
 
 namespace TransferEngineData
 {
-
     enum TransferStatus {
         Unknown,
         NotStarted,
@@ -45,6 +44,5 @@ namespace TransferEngineData
         Download,
         Sync
     };
-
 }
 #endif // TRANSFERTYPES_H
