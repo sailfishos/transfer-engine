@@ -110,10 +110,8 @@ Documentation for Nemo TransferEngine
 %setup -q -n %{name}-%{version}
 
 %build
-
-%qmake5
-
-make %{?jobs:-j%jobs}
+%qmake5 "VERSION=%{version}"
+make %{?_smp_mflags}
 make docs
 
 %install
