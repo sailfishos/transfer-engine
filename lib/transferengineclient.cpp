@@ -91,9 +91,6 @@ CallbackInterface::CallbackInterface(const QString &server, const QString &path,
 {
 }
 
-/*!
-    Destroys CallbackInterface object.
- */
 CallbackInterface::~CallbackInterface()
 {
     delete d_ptr;
@@ -194,10 +191,6 @@ TransferEngineClient::TransferEngineClient(QObject *parent) :
                                               this);
 }
 
-
-/*!
-    Destructor.
- */
 TransferEngineClient::~TransferEngineClient()
 {
     Q_D(TransferEngineClient);

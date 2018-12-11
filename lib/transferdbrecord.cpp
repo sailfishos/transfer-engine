@@ -66,14 +66,9 @@
     \value RestartSupported Boolean to indicate if cancel is supported
 */
 
-/*!
-    Default constructor.
- */
 TransferDBRecord::TransferDBRecord()
 {
-
 }
-
 
 /*!
     Assigns \a other to this transfer db record and returns a reference to this transfer db record.
@@ -122,9 +117,6 @@ TransferDBRecord::TransferDBRecord(const TransferDBRecord &other):
 {
 }
 
-/*!
-    Destroys the transfer db record.
- */
 TransferDBRecord::~TransferDBRecord()
 {
 }

@@ -26,6 +26,14 @@ shareui.path = /usr/share/nemo-transferengine/plugins
 target.path = /usr/lib/nemo-transferengine/plugins
 INSTALLS += target shareui
 
+# NOTE: the translations here assume that generic sharing UI system will pick up the
+# translations from specific /usr/share/translations/nemotransferengine/ with
+# specific name where '-' separates locale code at the end.
+# It might work for time being, but it's preferred if plugins take the responsibility
+# for loading translations in sharing plugin if that uses translations, and/or from
+# qml code. Latter commonly by importing an own module where c++ side instantiates
+# and installs QTranslator(s) to the qApp on initializeEngine().
+
 TS_FILE = $$OUT_PWD/example_share_plugin.ts
 EE_QM = $$OUT_PWD/example_share_plugin_eng_en.qm
 
@@ -49,8 +57,8 @@ engineering_english_install.path = /usr/share/translations/nemotransferengine
 engineering_english_install.files = $$EE_QM
 engineering_english_install.CONFIG += no_check_exist
 
-TS_FI_FILE = translations/example_share_plugin_fi.ts
-QM_FI_FILE = example_share_plugin_fi.qm
+TS_FI_FILE = translations/example_share_plugin-fi.ts
+QM_FI_FILE = example_share_plugin-fi.qm
 
 finnish.commands += lrelease -idbased $$TS_FI_FILE -qm $$QM_FI_FILE
 finnish.CONFIG += no_check_exist no_link

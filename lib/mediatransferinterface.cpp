@@ -156,11 +156,9 @@ public:
 MediaTransferInterface::MediaTransferInterface(QObject *parent):
     QObject(parent),
     d_ptr(new MediaTransferInterfacePrivate)
-{}
+{
+}
 
-/*!
-    Destructor.
- */
 MediaTransferInterface::~MediaTransferInterface()
 {
     delete d_ptr;

@@ -31,11 +31,10 @@
 
 // Originally this was meant to be exposed to QML side, but not anymore.
 class MediaItemPrivate;
+
 class MediaItem: public QObject
 {
-
 public:
-
     enum ValueKey {
         TransferType,
         Timestamp,

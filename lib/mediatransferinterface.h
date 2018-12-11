@@ -38,7 +38,6 @@ class MediaTransferInterface: public QObject
 {
     Q_OBJECT
 public:
-
     enum TransferStatus {
         NotStarted            = TransferEngineData::NotStarted,
         TransferStarted       = TransferEngineData::TransferStarted,
@@ -46,7 +45,6 @@ public:
         TransferFinished      = TransferEngineData::TransferFinished,
         TransferInterrupted   = TransferEngineData::TransferInterrupted
     };
-
 
     explicit MediaTransferInterface(QObject *parent = 0);
     virtual ~MediaTransferInterface();

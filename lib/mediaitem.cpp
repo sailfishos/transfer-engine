@@ -30,9 +30,6 @@
 class MediaItemPrivate
 {
 public:
-    MediaItemPrivate()
-    {}
-
     QMap <MediaItem::ValueKey, QVariant> m_values;
 };
 
@@ -96,9 +93,6 @@ MediaItem::MediaItem(QObject *parent):
 {
 }
 
-/*!
-    Destructor.
- */
 MediaItem::~MediaItem()
 {
     delete d_ptr;
