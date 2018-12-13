@@ -1,5 +1,5 @@
 Name: nemo-transferengine-qt5
-Version: 0.3.1
+Version: 1.0.0
 Release: 0
 Summary: Transfer Engine for uploading media content and tracking transfers.
 Group: System Environment/Daemon
@@ -110,10 +110,8 @@ Documentation for Nemo TransferEngine
 %setup -q -n %{name}-%{version}
 
 %build
-
-%qmake5
-
-make %{?jobs:-j%jobs}
+%qmake5 "VERSION=%{version}"
+make %{?_smp_mflags}
 make docs
 
 %install
