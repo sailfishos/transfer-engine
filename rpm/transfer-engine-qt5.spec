@@ -6,6 +6,7 @@ Group: System Environment/Daemon
 License: LGPLv2.1
 URL: https://git.merproject.org/mer-core/transfer-engine
 Source0: %{name}-%{version}.tar.gz
+Source1: %{name}.privileges
 BuildRequires: pkgconfig(Qt5Core)
 BuildRequires: pkgconfig(Qt5DBus)
 BuildRequires: pkgconfig(Qt5Sql)
@@ -36,6 +37,7 @@ Obsoletes: nemo-transferengine <= 0.0.19
 %{_bindir}/nemo-transfer-engine
 %{_datadir}/dbus-1/services/org.nemo.transferengine.service
 %{_datadir}/translations/nemo-transfer-engine_eng_en.qm
+%{_datadir}/mapplauncherd/privileges.d/*
 
 %package -n libnemotransferengine-qt5
 Summary: Transfer engine library.
@@ -121,6 +123,9 @@ mkdir -p %{buildroot}/%{_datadir}/nemo-transferengine
 
 mkdir -p %{buildroot}/%{_docdir}/%{name}
 cp -R doc/html/* %{buildroot}/%{_docdir}/%{name}/
+
+mkdir -p %{buildroot}%{_datadir}/mapplauncherd/privileges.d
+install -m 644 -p %{SOURCE1} %{buildroot}%{_datadir}/mapplauncherd/privileges.d
 
 %define def_uid $(grep "^UID_MIN" /etc/login.defs |  tr -s " " | cut -d " " -f2)
 %define def_user $(getent passwd %def_uid | sed 's/:.*//')
