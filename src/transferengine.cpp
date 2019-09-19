@@ -1,34 +1,34 @@
-/****************************************************************************************
-**
-** Copyright (C) 2013-2016 Jolla Ltd.
-** Contact: Marko Mattila <marko.mattila@jollamobile.com>
-** All rights reserved.
-**
-** This file is part of Nemo Transfer Engine package.
-**
-** You may use this file under the terms of the GNU Lesser General
-** Public License version 2.1 as published by the Free Software Foundation
-** and appearing in the file license.lgpl included in the packaging
-** of this file.
-**
-** This library is free software; you can redistribute it and/or
-** modify it under the terms of the GNU Lesser General Public
-** License version 2.1 as published by the Free Software Foundation
-** and appearing in the file license.lgpl included in the packaging
-** of this file.
-**
-** This library is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-** Lesser General Public License for more details.
-**
-****************************************************************************************/
+/*
+ * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2019 Open Mobile Platform LLC.
+ *
+ * All rights reserved.
+ *
+ * This file is part of Sailfish Transfer Engine package.
+ *
+ * You may use this file under the terms of the GNU Lesser General
+ * Public License version 2.1 as published by the Free Software Foundation
+ * and appearing in the file license.lgpl included in the packaging
+ * of this file.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License version 2.1 as published by the Free Software Foundation
+ * and appearing in the file license.lgpl included in the packaging
+ * of this file.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ */
 
 #include "transferengine.h"
 #include "transferengine_p.h"
 #include "transferplugininterface.h"
 #include "mediaitem.h"
 #include "dbmanager.h"
+#include "logging.h"
 #include "transferengine_adaptor.h"
 #include "transfertypes.h"
 #include "transferplugininfo.h"
@@ -110,7 +110,7 @@ void ClientActivityMonitor::newActivity(int transferId)
 void ClientActivityMonitor::activityFinished(int transferId)
 {
     if (!m_activityMap.contains(transferId)) {
-        qWarning() << Q_FUNC_INFO << "Could not find matching TransferId. This is probably an error!";
+        qCWarning(lcTransferLog) << Q_FUNC_INFO << "Could not find matching TransferId. This is probably an error!";
         return;
     }
 
@@ -179,7 +179,7 @@ TransferEnginePrivate::TransferEnginePrivate(TransferEngine *parent):
     QSettings settings(CONFIG_PATH, QSettings::IniFormat);
 
     if (settings.status() != QSettings::NoError) {
-        qWarning() << Q_FUNC_INFO << "Failed to read settings!" << settings.status();
+        qCWarning(lcTransferLog) << Q_FUNC_INFO << "Failed to read settings!" << settings.status();
     } else {
         settings.beginGroup("transfers");
         const QString service = settings.value("service").toString();
@@ -206,7 +206,7 @@ void TransferEnginePrivate::pluginDirChanged()
 void TransferEnginePrivate::exitSafely()
 {
     if (!m_activityMonitor->activeTransfers()) {
-        qDebug() << "Scheduling exit in" << m_delayedExitTimer->interval() << "ms";
+        qCDebug(lcTransferLog) << "Scheduling exit in" << m_delayedExitTimer->interval() << "ms";
         m_delayedExitTimer->start();
     } else {
         m_delayedExitTimer->stop();
@@ -216,9 +216,9 @@ void TransferEnginePrivate::exitSafely()
 void TransferEnginePrivate::delayedExitSafely()
 {
     if (getenv("TRANSFER_ENGINE_KEEP_RUNNING")) {
-        qDebug() << "Keeping transfer engine running";
+        qCDebug(lcTransferLog) << "Keeping transfer engine running";
     } else {
-        qDebug() << "Stopping transfer engine";
+        qCDebug(lcTransferLog) << "Stopping transfer engine";
         qApp->exit();
     }
 }
@@ -231,7 +231,7 @@ void TransferEnginePrivate::enabledPluginsCheck()
     }
 
     if (m_infoObjects.count() > 0) {
-        qWarning() << Q_FUNC_INFO << "Already quering account info" << m_infoObjects.count();
+        qCWarning(lcTransferLog) << Q_FUNC_INFO << "Already quering account info" << m_infoObjects.count();
         return;
     }
 
@@ -260,7 +260,7 @@ void TransferEnginePrivate::enabledPluginsCheck()
 
             TransferPluginInfo *info = interface->infoObject();
             if (!info) {
-                qWarning() << Q_FUNC_INFO << "NULL Info object!";
+                qCWarning(lcTransferLog) << Q_FUNC_INFO << "NULL Info object!";
                 continue;
             }
 
@@ -279,7 +279,7 @@ void TransferEnginePrivate::enabledPluginsCheck()
         }
 
         if (!interface) {
-            qWarning() << Q_FUNC_INFO << loader.errorString();
+            qCWarning(lcTransferLog) << Q_FUNC_INFO << loader.errorString();
         }
     }
 }
@@ -376,7 +376,7 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
             // Ok exit
             break;
         default:
-            qWarning() << "TransferEnginePrivate::sendNotification: unknown state";
+            qCWarning(lcTransferLog) << "TransferEnginePrivate::sendNotification: unknown state";
             break;
         }
 
@@ -402,7 +402,7 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
             category.clear();
             break;
         default:
-            qWarning() << "TransferEnginePrivate::sendNotification: unknown state";
+            qCWarning(lcTransferLog) << "TransferEnginePrivate::sendNotification: unknown state";
             category.clear();
             break;
         }
@@ -490,11 +490,11 @@ int TransferEnginePrivate::uploadMediaItem(MediaItem *mediaItem,
     Q_Q(TransferEngine);
 
     if (mediaItem == 0) {
-        qWarning() << "TransferEngine::uploadMediaItem invalid MediaItem";
+        qCWarning(lcTransferLog) << "TransferEngine::uploadMediaItem invalid MediaItem";
         return -1;
     }
     if (muif == 0) {
-        qWarning() << "TransferEngine::uploadMediaItem Failed to get MediaTransferInterface";
+        qCWarning(lcTransferLog) << "TransferEngine::uploadMediaItem Failed to get MediaTransferInterface";
         return -1;
     }
 
@@ -529,7 +529,7 @@ int TransferEnginePrivate::uploadMediaItem(MediaItem *mediaItem,
     m_keyTypeCache.insert(key, TransferEngineData::Upload);
 
     if (key < 0) {
-        qWarning() << "TransferEngine::uploadMediaItem: Failed to create an entry to transfer database!";
+        qCWarning(lcTransferLog) << "TransferEngine::uploadMediaItem: Failed to create an entry to transfer database!";
         delete muif;
         return key;
     }
@@ -579,7 +579,7 @@ MediaTransferInterface *TransferEnginePrivate::loadPlugin(const QString &pluginI
         }
 
         if (!interface) {
-            qWarning() << "TransferEngine::loadPlugin: " + loader.errorString();
+            qCWarning(lcTransferLog) << "TransferEngine::loadPlugin: " + loader.errorString();
         }
 
         if (loader.isLoaded()) {
@@ -629,7 +629,7 @@ void TransferEnginePrivate::uploadItemStatusChanged(MediaTransferInterface::Tran
         sendNotification(type, tStatus, muif->progress(), mediaFileOrResourceName(muif->mediaItem()), key);
         ok = DbManager::instance()->updateTransferStatus(key, tStatus);
         if (m_plugins.remove(muif) == 0) {
-            qWarning() << "TransferEnginePrivate::uploadItemStatusChanged: Failed to remove media upload object from the map!";
+            qCWarning(lcTransferLog) << "TransferEnginePrivate::uploadItemStatusChanged: Failed to remove media upload object from the map!";
             // What to do here.. Let's just delete it..
         }
         muif->deleteLater();
@@ -638,12 +638,12 @@ void TransferEnginePrivate::uploadItemStatusChanged(MediaTransferInterface::Tran
     } break;
 
     default:
-        qWarning() << "TransferEnginePrivate::uploadItemStatusChanged: unhandled status: "  << tStatus;
+        qCWarning(lcTransferLog) << "TransferEnginePrivate::uploadItemStatusChanged: unhandled status: "  << tStatus;
         break;
     }
 
     if (!ok) {
-        qWarning() << "TransferEnginePrivate::uploadItemStatusChanged: Failed update share status for the item: " + key;
+        qCWarning(lcTransferLog) << "TransferEnginePrivate::uploadItemStatusChanged: Failed update share status for the item: " + key;
         return;
     }
 
@@ -657,7 +657,7 @@ void TransferEnginePrivate::updateProgress(qreal progress)
     const int key = m_plugins.value(muif);
 
     if (!DbManager::instance()->updateProgress(key, progress)) {
-        qWarning() << "TransferEnginePrivate::updateProgress: Failed to update progress";
+        qCWarning(lcTransferLog) << "TransferEnginePrivate::updateProgress: Failed to update progress";
         return;
     }
 
@@ -678,7 +678,7 @@ void TransferEnginePrivate::pluginInfoReady()
     if (m_infoObjects.removeOne(infoObj)) {
         delete infoObj;
     } else {
-        qWarning() << Q_FUNC_INFO << "Failed to remove info object!";
+        qCWarning(lcTransferLog) << Q_FUNC_INFO << "Failed to remove info object!";
         delete infoObj;
     }
 
@@ -690,7 +690,7 @@ void TransferEnginePrivate::pluginInfoReady()
 
 void TransferEnginePrivate::pluginInfoError(const QString &msg)
 {
-    qWarning() << "TransferEnginePrivate::pluginInfoError:" << msg;
+    qCWarning(lcTransferLog) << "TransferEnginePrivate::pluginInfoError:" << msg;
     TransferPluginInfo *infoObj = qobject_cast<TransferPluginInfo*>(sender());
     m_infoObjects.removeOne(infoObj);
     infoObj->deleteLater();
@@ -721,7 +721,7 @@ void TransferEnginePrivate::callbackCall(int transferId, CallbackMethodType meth
     // empty string. So the list length is always 5.
     QStringList callback = DbManager::instance()->callback(transferId);
     if (callback.length() != 5) {
-        qWarning() << "TransferEnginePrivate:callbackCall: Invalid callback interface";
+        qCWarning(lcTransferLog) << "TransferEnginePrivate:callbackCall: Invalid callback interface";
         return;
     }
 
@@ -730,18 +730,18 @@ void TransferEnginePrivate::callbackCall(int transferId, CallbackMethodType meth
                                    callback.at(Interface));
 
     if (!remoteInterface.isValid()) {
-        qWarning() << "TransferEnginePrivate::callbackCall: DBus interface is not valid!";
+        qCWarning(lcTransferLog) << "TransferEnginePrivate::callbackCall: DBus interface is not valid!";
         return;
     }
 
     if (method >= callback.size()) {
-        qWarning() << "TransferEnginePrivate::callbackCall: method index out of range!";
+        qCWarning(lcTransferLog) << "TransferEnginePrivate::callbackCall: method index out of range!";
         return;
     }
 
     const QString methodName = callback.at(method);
     if (methodName.isEmpty()) {
-        qWarning() << "TransferEnginePrivate::callbackCall: Failed to get callback method name!";
+        qCWarning(lcTransferLog) << "TransferEnginePrivate::callbackCall: Failed to get callback method name!";
         return;
     }    
     remoteInterface.call(methodName, transferId);    
@@ -849,7 +849,7 @@ TransferEngine::~TransferEngine()
     connection.unregisterObject("/org/nemo/transferengine");
 
     if (!connection.unregisterService("org.nemo.transferengine")) {
-        qWarning() << "Failed to unregister org.nemo.tranferengine service";
+        qCWarning(lcTransferLog) << "Failed to unregister org.nemo.tranferengine service";
     }
 }
 
@@ -889,14 +889,14 @@ int TransferEngine::uploadMediaItem(const QString &source,
 
     MediaTransferInterface *muif = d->loadPlugin(serviceId);
     if (muif == 0) {
-        qWarning() << "TransferEngine::uploadMediaItem Failed to get MediaTransferInterface";
+        qCWarning(lcTransferLog) << "TransferEngine::uploadMediaItem Failed to get MediaTransferInterface";
         return -1;
     }
 
     QUrl filePath(source);
     QFileInfo fileInfo(filePath.toLocalFile());
     if (!fileInfo.exists()) {
-        qWarning() << "TransferEnginePrivate::uploadMediaItem file " << source << " doesn't exist!";
+        qCWarning(lcTransferLog) << "TransferEnginePrivate::uploadMediaItem file " << source << " doesn't exist!";
     }
 
     MediaItem *mediaItem = new MediaItem(muif);
@@ -931,7 +931,7 @@ int TransferEngine::uploadMediaItemContent(const QVariantMap &content,
 
     MediaTransferInterface *muif = d->loadPlugin(serviceId);
     if (muif == 0) {
-        qWarning() << "TransferEngine::uploadMediaItemContent Failed to get MediaTransferInterface";
+        qCWarning(lcTransferLog) << "TransferEngine::uploadMediaItemContent Failed to get MediaTransferInterface";
         return -1;
     }
 
@@ -1068,12 +1068,12 @@ void TransferEngine::startTransfer(int transferId)
 
     TransferEngineData::TransferType type = d->transferType(transferId);
     if (type == TransferEngineData::Undefined) {
-        qWarning() << "TransferEngine::startTransfer: failed to get transfer type";
+        qCWarning(lcTransferLog) << "TransferEngine::startTransfer: failed to get transfer type";
         return;
     }
 
     if (type == TransferEngineData::Upload) {
-        qWarning() << "TransferEngine::startTransfer: starting upload isn't supported";
+        qCWarning(lcTransferLog) << "TransferEngine::startTransfer: starting upload isn't supported";
         return;
     }
 
@@ -1087,7 +1087,7 @@ void TransferEngine::startTransfer(int transferId)
         emit statusChanged(transferId, TransferEngineData::TransferStarted);
         emit activeTransfersChanged();
     } else {
-        qWarning() << "TransferEngine::startTransfer: could not start transfer";
+        qCWarning(lcTransferLog) << "TransferEngine::startTransfer: could not start transfer";
     }
 }
 
@@ -1106,7 +1106,7 @@ void TransferEngine::restartTransfer(int transferId)
 
     TransferEngineData::TransferType type = d->transferType(transferId);
     if (type == TransferEngineData::Undefined) {
-        qWarning() << "TransferEngine::restartTransfer: failed to get transfer type";
+        qCWarning(lcTransferLog) << "TransferEngine::restartTransfer: failed to get transfer type";
         return;
     }
 
@@ -1114,7 +1114,7 @@ void TransferEngine::restartTransfer(int transferId)
 
         MediaItem * item = DbManager::instance()->mediaItem(transferId);
         if (!item) {
-            qWarning() << "TransferEngine::restartTransfer: failed to reload media item from db!";
+            qCWarning(lcTransferLog) << "TransferEngine::restartTransfer: failed to reload media item from db!";
             return;
         }
 
@@ -1173,7 +1173,7 @@ void TransferEngine::finishTransfer(int transferId, int status, const QString &r
     if (type == TransferEngineData::Download) {
         MediaItem *mediaItem = DbManager::instance()->mediaItem(transferId);
         if (!mediaItem) {
-            qWarning() << "TransferEngine::finishTransfer: Failed to fetch MediaItem";
+            qCWarning(lcTransferLog) << "TransferEngine::finishTransfer: Failed to fetch MediaItem";
             return;
         }
         fileName = d->mediaFileOrResourceName(mediaItem);
@@ -1228,7 +1228,7 @@ void TransferEngine::updateTransferProgress(int transferId, double progress)
 
     MediaItem *mediaItem = DbManager::instance()->mediaItem(transferId);
     if (!mediaItem) {
-        qWarning() << "TransferEngine::finishTransfer: Failed to fetch MediaItem";
+        qCWarning(lcTransferLog) << "TransferEngine::finishTransfer: Failed to fetch MediaItem";
         return;
     }
     QString fileName = d->mediaFileOrResourceName(mediaItem);
@@ -1242,7 +1242,7 @@ void TransferEngine::updateTransferProgress(int transferId, double progress)
             d->sendNotification(type, DbManager::instance()->transferStatus(transferId), progress, fileName, transferId);
         }
     } else {
-         qWarning() << "TransferEngine::updateTransferProgress: Failed to update progress for " << transferId;
+         qCWarning(lcTransferLog) << "TransferEngine::updateTransferProgress: Failed to update progress for " << transferId;
     }
 }
 
@@ -1356,7 +1356,7 @@ void TransferEngine::cancelTransfer(int transferId)
     if (type == TransferEngineData::Upload) {
         MediaTransferInterface *muif = d->m_plugins.key(transferId);
         if (muif == 0) {
-            qWarning() << "TransferEngine::cancelTransfer: Failed to get MediaTransferInterface!";
+            qCWarning(lcTransferLog) << "TransferEngine::cancelTransfer: Failed to get MediaTransferInterface!";
             return;
         }
         d->m_activityMonitor->activityFinished(transferId);

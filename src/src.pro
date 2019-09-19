@@ -53,10 +53,12 @@ PRE_TARGETDEPS += ts engineering_english
 # Input
 SOURCES += main.cpp \
     dbmanager.cpp \
+    logging.cpp \
     transferengine.cpp
 
 HEADERS += \
     dbmanager.h \
+    logging.h \
     transferengine.h \
     transferengine_p.h
 
