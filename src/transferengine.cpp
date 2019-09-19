@@ -154,8 +154,8 @@ TransferEnginePrivate::TransferEnginePrivate(TransferEngine *parent):
 
     m_delayedExitTimer = new QTimer(this);
     m_delayedExitTimer->setSingleShot(true);
-    m_delayedExitTimer->setInterval(5000);
-    m_delayedExitTimer->start(); // Exit if nothing happens within 5 sec
+    m_delayedExitTimer->setInterval(60000);
+    m_delayedExitTimer->start(); // Exit if nothing happens within 60 sec
     connect(m_delayedExitTimer, SIGNAL(timeout()), this, SLOT(delayedExitSafely()));
 
     m_fileWatcher = new QFileSystemWatcher(this);
