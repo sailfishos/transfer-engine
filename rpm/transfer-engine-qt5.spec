@@ -67,40 +67,40 @@ Requires: libnemotransferengine-qt5 = %{version}
 %{_libdir}/pkgconfig/nemotransferengine-qt5.pc
 
 %package ts-devel
-Summary:   Translation source for Nemo TransferEngine
+Summary:   Translation source for Sailfish Transfer Engine
 License:   LGPLv2.1
 Group:     System Environment/Daemon
 Provides: nemo-transferengine-ts-devel > 0.0.19
 Obsoletes: nemo-transferengine-ts-devel <= 0.0.19
 
 %description ts-devel
-Translation source for Nemo TransferEngine
+Translation source for Sailfish Transfer Engine
 
 %files ts-devel
 %defattr(-,root,root,-)
 %{_datadir}/translations/source/*.ts
 
 %package tests
-Summary:   Unit tests for Nemo TransferEngine
+Summary:   Unit tests for Sailfish Transfer Engine
 License:   LGPLv2.1
 Group:     System Environment/Daemon
 
 %description tests
-Unit tests for Nemo TransferEngine
+Unit tests for Sailfish Transfer Engine
 
 %files tests
 %defattr(-,root,root,-)
 /opt/tests/nemo-transfer-engine-qt5
 
 %package doc
-Summary:   Documentation for Nemo TransferEngine
+Summary:   Documentation for Sailfish Transfer Engine
 License:   BSD
 Group:     System Environment/Daemon
 Provides: nemo-transferengine-doc > 0.0.19
 Obsoletes: nemo-transferengine-doc <= 0.0.19
 
 %description doc
-Documentation for Nemo TransferEngine
+Documentation for Sailfish Transfer Engine
 
 %files doc
 %defattr(-,root,root,-)

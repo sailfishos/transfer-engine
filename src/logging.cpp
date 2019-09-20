@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2019 Open Mobile Platform LLC.
  *
  * All rights reserved.
  *
@@ -22,20 +22,6 @@
  * Lesser General Public License for more details.
  */
 
-#ifndef IMAGEOPERATION_H
-#define IMAGEOPERATION_H
+#include "logging.h"
 
-#include <QString>
-#include <QDir>
-
-class ImageOperation
-{
-public:
-    static QString uniqueFilePath(const QString &sourceFilePath, const QString &path = QDir::tempPath());
-    static QString removeImageMetadata(const QString &sourceFile);
-    static QString scaleImage(const QString &sourceFile, qreal scaleFactor, const QString &targetFile=QString());
-    static QString scaleImageToSize(const QString &sourceFile, quint64 targetSize, const QString &targetFile=QString());
-    static void imageOrientation(const QString &sourceFile, int *angle, bool *mirror);
-};
-
-#endif // IMAGEOPERATION_H
+Q_LOGGING_CATEGORY(lcTransferLog, "org.sailfishos.transferengine", QtWarningMsg)
