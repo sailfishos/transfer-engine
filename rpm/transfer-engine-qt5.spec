@@ -1,10 +1,10 @@
-Name: nemo-transferengine-qt5
+Name:    nemo-transferengine-qt5
 Version: 1.0.0
 Release: 0
 Summary: Transfer Engine for uploading media content and tracking transfers.
-Group: System Environment/Daemon
-License: LGPLv2.1
-URL: https://git.merproject.org/mer-core/transfer-engine
+Group:   System Environment/Daemon
+License: LGPLv2
+URL:     https://git.sailfishos.org/mer-core/transfer-engine
 Source0: %{name}-%{version}.tar.gz
 Source1: %{name}.privileges
 BuildRequires: pkgconfig(Qt5Core)
@@ -68,8 +68,6 @@ Requires: libnemotransferengine-qt5 = %{version}
 
 %package ts-devel
 Summary:   Translation source for Sailfish Transfer Engine
-License:   LGPLv2.1
-Group:     System Environment/Daemon
 Provides: nemo-transferengine-ts-devel > 0.0.19
 Obsoletes: nemo-transferengine-ts-devel <= 0.0.19
 
@@ -82,8 +80,6 @@ Translation source for Sailfish Transfer Engine
 
 %package tests
 Summary:   Unit tests for Sailfish Transfer Engine
-License:   LGPLv2.1
-Group:     System Environment/Daemon
 
 %description tests
 Unit tests for Sailfish Transfer Engine
@@ -95,8 +91,7 @@ Unit tests for Sailfish Transfer Engine
 %package doc
 Summary:   Documentation for Sailfish Transfer Engine
 License:   BSD
-Group:     System Environment/Daemon
-Provides: nemo-transferengine-doc > 0.0.19
+Provides:  nemo-transferengine-doc > 0.0.19
 Obsoletes: nemo-transferengine-doc <= 0.0.19
 
 %description doc
