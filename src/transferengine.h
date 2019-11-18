@@ -86,6 +86,8 @@ public Q_SLOTS:
     QList <TransferMethodInfoDeprecated> transferMethods();
     QList <TransferMethodInfo> transferMethods2();
 
+    QList<QVariantMap> pluginMetaData();
+
     void clearTransfers();
 
     void clearTransfer(int transferId);

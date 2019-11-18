@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2013 - 2019 Jolla Ltd.
  * Copyright (c) 2019 Open Mobile Platform LLC.
  *
  * All rights reserved.
@@ -23,30 +22,19 @@
  * Lesser General Public License for more details.
  */
 
-#ifndef TRANSFERPLUGININFO_H
-#define TRANSFERPLUGININFO_H
-#include <QObject>
-#include <QVariantMap>
-#include "transfermethodinfo.h"
+#include "transferplugininfo.h"
 
-class TransferPluginInfo: public QObject
+QVariantMap TransferPluginInfo::metaData() const
 {
-    Q_OBJECT
-public:
-    virtual QList<TransferMethodInfo> info() const = 0;
-    virtual void query() = 0;
-    virtual bool ready() const = 0;
+    return property("_nemo_transferplugininfo_capabilities").toMap();
+}
 
-    QVariantMap metaData() const;
+void TransferPluginInfo::setMetaData(const QVariantMap &metaData)
+{
+    setProperty("_nemo_transferplugininfo_capabilities", metaData);
+}
 
-    static void registerType();
-
-protected:
-    void setMetaData(const QVariantMap &metaData);
-
-Q_SIGNALS:
-    void infoReady();
-    void infoError(const QString &msg);
-};
-
-#endif // TRANSFERPLUGINSTATUS_H
+void TransferPluginInfo::registerType()
+{
+    qDBusRegisterMetaType<QList<QVariantMap> >();
+}
