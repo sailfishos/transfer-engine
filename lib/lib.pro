@@ -25,6 +25,7 @@ SOURCES += \
     mediatransferinterface.cpp \
     mediaitem.cpp \
     transfermethodinfo.cpp \
+    transferplugininfo.cpp \
     transferengineclient.cpp \
     imageoperation.cpp
 

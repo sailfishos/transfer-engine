@@ -70,6 +70,7 @@
     Creates an instance of TransferMethodInfo.
  */
 TransferMethodInfo::TransferMethodInfo()
+    : accountId(0)
 {
 }
 

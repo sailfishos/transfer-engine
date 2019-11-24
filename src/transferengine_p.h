@@ -126,6 +126,7 @@ public Q_SLOTS:
 public:
     QStringList pluginList() const;
     QList <TransferMethodInfo> enabledPlugins() const;
+    QList<QVariantMap> pluginMetaData() const;
     MediaTransferInterface *loadPlugin(const QString &pluginId) const;
     QString mediaFileOrResourceName(MediaItem *mediaItem) const;
 
@@ -135,6 +136,7 @@ private:
     bool m_notificationsEnabled;
     QList <TransferPluginInfo*> m_infoObjects;
     QList <TransferMethodInfo> m_enabledPlugins;
+    QList<QVariantMap> m_pluginMetaData;
     Accounts::Manager *m_accountManager;
     QFileSystemWatcher *m_fileWatcher;
     QTimer *m_fileWatcherTimer;

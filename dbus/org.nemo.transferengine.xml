@@ -97,6 +97,12 @@
             <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QList &lt; TransferMethodInfo&gt; "/>
         </method>
 
+        # Get a list of plugin metadata
+        <method name="pluginMetaData">
+            <arg name="methods" type="a(a{sv})" direction="out" />
+            <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QList &lt; QVariantMap &gt; "/>
+        </method>
+
         # clear all unfinished transfers
         <method name="clearTransfers" />
 

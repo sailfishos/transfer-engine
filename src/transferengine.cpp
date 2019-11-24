@@ -237,6 +237,7 @@ void TransferEnginePrivate::enabledPluginsCheck()
 
     // First clear old data
     m_enabledPlugins.clear();
+    m_pluginMetaData.clear();
     qDeleteAll(m_infoObjects);
     m_infoObjects.clear();
 
@@ -268,6 +269,7 @@ void TransferEnginePrivate::enabledPluginsCheck()
                 if (info->info().count() > 0) {
                     m_enabledPlugins << info->info();
                 }
+                m_pluginMetaData << info->metaData();
                 delete info;
             } else {
                 // These object will be cleaned in pluginInfoReady() slot.
@@ -564,6 +566,11 @@ QList <TransferMethodInfo> TransferEnginePrivate::enabledPlugins() const
     return m_enabledPlugins;
 }
 
+QList<QVariantMap> TransferEnginePrivate::pluginMetaData() const
+{
+    return m_pluginMetaData;
+}
+
 MediaTransferInterface *TransferEnginePrivate::loadPlugin(const QString &pluginId) const
 {
     QPluginLoader loader;
@@ -674,6 +681,7 @@ void TransferEnginePrivate::pluginInfoReady()
     if (!infoList.isEmpty()) {
         m_enabledPlugins << infoList;
     }
+    m_pluginMetaData << infoObj->metaData();
 
     if (m_infoObjects.removeOne(infoObj)) {
         delete infoObj;
@@ -815,6 +823,7 @@ TransferEngine::TransferEngine(QObject *parent) :
     TransferMethodInfoDeprecated::registerType();
     TransferMethodInfo::registerType();
     TransferDBRecord::registerType();
+    TransferPluginInfo::registerType();
 
     QDBusConnection connection = QDBusConnection::sessionBus();
     if (!connection.registerObject("/org/nemo/transferengine", this)) {
@@ -1296,6 +1305,18 @@ QList <TransferMethodInfo> TransferEngine::transferMethods2()
     Q_D(TransferEngine);
     d->exitSafely();
     return d->enabledPlugins();
+}
+
+/*!
+    DBus adaptor calls this method to fetch a list of the share plugin metadata.
+
+    This method returns QList<QVariantMap>.
+ */
+QList<QVariantMap> TransferEngine::pluginMetaData()
+{
+    Q_D(TransferEngine);
+    d->exitSafely();
+    return d->pluginMetaData();
 }
 
 /*!
