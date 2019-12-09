@@ -122,9 +122,6 @@ cp -R doc/html/* %{buildroot}/%{_docdir}/%{name}/
 mkdir -p %{buildroot}%{_datadir}/mapplauncherd/privileges.d
 install -m 644 -p %{SOURCE1} %{buildroot}%{_datadir}/mapplauncherd/privileges.d
 
-%define def_uid $(grep "^UID_MIN" /etc/login.defs |  tr -s " " | cut -d " " -f2)
-%define def_user $(getent passwd %def_uid | sed 's/:.*//')
-%define db_file /home/%{def_user}/.local/nemo-transferengine/transferdb.sqlite
 %define te_pid $(pgrep -f nemo-transfer-engine)
 
 %post -n libnemotransferengine-qt5
