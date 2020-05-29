@@ -2,7 +2,6 @@ Name:    nemo-transferengine-qt5
 Version: 1.0.0
 Release: 0
 Summary: Transfer Engine for uploading media content and tracking transfers.
-Group:   System Environment/Daemon
 License: LGPLv2
 URL:     https://git.sailfishos.org/mer-core/transfer-engine
 Source0: %{name}-%{version}.tar.gz
@@ -23,6 +22,7 @@ BuildRequires: qt5-qttools-qthelp-devel
 BuildRequires: qt5-plugin-platform-minimal
 BuildRequires: qt5-plugin-sqldriver-sqlite
 BuildRequires: pkgconfig(qt5-boostable)
+BuildRequires: systemd
 Requires: libnemotransferengine-qt5 = %{version}
 Provides: nemo-transferengine > 0.0.19
 Obsoletes: nemo-transferengine <= 0.0.19
@@ -32,7 +32,7 @@ Obsoletes: nemo-transferengine <= 0.0.19
 
 %files
 %defattr(-,root,root,-)
-%{_libdir}/systemd/user/transferengine.service
+%{_userunitdir}/transferengine.service
 %dir %{_datadir}/nemo-transferengine
 %{_bindir}/nemo-transfer-engine
 %{_datadir}/dbus-1/services/org.nemo.transferengine.service
@@ -41,7 +41,6 @@ Obsoletes: nemo-transferengine <= 0.0.19
 
 %package -n libnemotransferengine-qt5
 Summary: Transfer engine library.
-Group: Development/Libraries
 
 %description -n libnemotransferengine-qt5
 %{summary}
@@ -53,7 +52,6 @@ Group: Development/Libraries
 
 %package -n libnemotransferengine-qt5-devel
 Summary: Development headers for transfer engine library.
-Group: Development/Libraries
 Requires: libnemotransferengine-qt5 = %{version}
 
 %description -n libnemotransferengine-qt5-devel

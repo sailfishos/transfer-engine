@@ -62,6 +62,8 @@ HEADERS += \
     transferengine.h \
     transferengine_p.h
 
+DEFINES += SHARE_PLUGINS_PATH=\"\\\"$$[QT_INSTALL_LIBS]/nemo-transferengine/plugins\\\"\"
+
 SERVICE_FILE += ../dbus/org.nemo.transferengine.service
 OTHER_FILES +=  $$SERVICE_FILE \
                 ../dbus/org.nemo.transferengine.xml
