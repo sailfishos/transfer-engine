@@ -7,7 +7,7 @@
     CONFIG += qt plugin
     QT += network
 
-    LIBTRANSFERENGINE_INC_DIR = /usr/include/TransferEngine-qt5
+    LIBTRANSFERENGINE_INC_DIR = $$[QT_INSTALL_PREFIX]/include/TransferEngine-qt5
 
     INCLUDEPATH += $${LIBTRANSFERENGINE_INC_DIR}
     DEPENDPATH  += $${LIBTRANSFERENGINE_INC_DIR}
@@ -16,7 +16,7 @@
     HEADERS += $${INCLUDEPATH}/transferplugininterface.h
     HEADERS += $${INCLUDEPATH}/mediatransferinterface.h
 
-    LIBTRANSFERENGINE_LIB_DIR = /usr/lib
+    LIBTRANSFERENGINE_LIB_DIR = $$[QT_INSTALL_LIBS]
     unix: QMAKE_FLAGS += $${QMAKE_LFLAGS_RPATH}$${LIBTRANSFERENGINE_LIB_DIR}
     LIBS += -L$${LIBTRANSFERENGINE_LIB_DIR}
     qtAddLibrary(nemotransferengine-qt5)

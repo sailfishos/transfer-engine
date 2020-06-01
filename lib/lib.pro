@@ -40,11 +40,11 @@ SOURCES += \
 OTHER_FILES += nemotransferengine-qt5.pc nemotransferengine-plugin-qt5.prf
 
 headers.files = $$HEADERS
-headers.path = /usr/include/TransferEngine-qt5
+headers.path = $$[QT_INSTALL_PREFIX]/include/TransferEngine-qt5
 
-target.path = /usr/lib
+target.path = $$[QT_INSTALL_LIBS]
 
-pkgconfigpc.path = /usr/lib/pkgconfig/
+pkgconfigpc.path = $$[QT_INSTALL_LIBS]/pkgconfig/
 pkgconfigpc.files = nemotransferengine-qt5.pc
 
 prf.path = $$[QT_INSTALL_DATA]/mkspecs/features
