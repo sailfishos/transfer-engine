@@ -13,6 +13,7 @@ BuildRequires: pkgconfig(Qt5Test)
 BuildRequires: pkgconfig(Qt5Qml)
 BuildRequires: pkgconfig(Qt5Quick)
 BuildRequires: pkgconfig(accounts-qt5)
+BuildRequires: pkgconfig(contentaction5)
 BuildRequires: desktop-file-utils
 BuildRequires: pkgconfig(quillmetadata-qt5)
 BuildRequires: pkgconfig(nemonotifications-qt5) >= 1.0.4

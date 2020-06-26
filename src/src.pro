@@ -20,7 +20,7 @@ transferengine.header_flags = -i metatypedeclarations.h -i transferengine.h -l T
 transferengine.source_flags = -l TransferEngine -c TransferEngineAdaptor
 
 CONFIG += link_pkgconfig
-PKGCONFIG += accounts-qt5 nemonotifications-qt5
+PKGCONFIG += accounts-qt5 nemonotifications-qt5 contentaction5
 
 # translations
 TS_FILE = $$OUT_PWD/nemo-transfer-engine.ts

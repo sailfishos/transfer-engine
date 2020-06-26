@@ -125,6 +125,11 @@
             <arg name="enabled" type="b" direction="out"/>
         </method>
 
+        # open a specific transfer file
+        <method name="openTransfer">
+            <arg name="transferId" type="i" direction="in"/>
+        </method>
+
         # Signals for indicating changes in transfers
         <signal name="progressChanged">
             <arg name="transferId" type="i" direction="out"/>

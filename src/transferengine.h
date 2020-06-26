@@ -98,6 +98,8 @@ public Q_SLOTS:
 
     bool notificationsEnabled();
 
+    void openTransfer(int transferId);
+
 Q_SIGNALS:
     void progressChanged(int transferId, double progress);
 

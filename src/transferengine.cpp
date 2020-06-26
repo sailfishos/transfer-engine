@@ -41,11 +41,17 @@
 #include <QTimer>
 #include <QSettings>
 
+// nemonotifications
 #include <notification.h>
 
+// stdlib
 #include <signal.h>
 
+// libaccounts-qt
 #include <Accounts/Manager>
+
+// libcontentaction
+#include "contentaction.h"
 
 #define CONFIG_PATH "/usr/share/nemo-transferengine/nemo-transfer-engine.conf"
 #define FILE_WATCHER_TIMEOUT 5000
@@ -339,6 +345,7 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
     Notification::Urgency urgency = Notification::Normal;
     QString appIcon = QStringLiteral("icon-lock-information");
     QString icon = QStringLiteral("icon-lock-transfer");
+    QVariantList actions = m_defaultActions;
 
     // TODO: explicit grouping of transfer notifications is now removed, as grouping
     // will now be performed by lipstick.  We may need to reinstate group summary
@@ -347,7 +354,7 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
     // Notification & Banner rules:
     //
     // Show Banner:
-    // - For succesfull uploads and for downloads
+    // - For successful uploads and for downloads
     // - For failed Uploads, Downloads, Syncs
     //
     // Show an event in the EventView:
@@ -367,6 +374,7 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
             category = TRANSFER_EVENT_CATEGORY; // Use "generic" transfer event for uploads
             break;
         case TransferEngineData::Download:
+        {
             category = TRANSFER_COMPLETE_EVENT_CATEGORY;
             //: Notification for successful file download
             //% "File downloaded"
@@ -374,7 +382,19 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
             summary = fileName;
             previewBody = body;
             previewSummary = summary;
+
+            //: Open the transferred file
+            //% "Open"
+            actions << Notification::remoteAction("action_open",
+                                                  qtTrId("transferengine-la-open_file"),
+                                                  "org.nemo.transferengine",
+                                                  "/org/nemo/transferengine",
+                                                  "org.nemo.transferengine",
+                                                  "openTransfer",
+                                                  (QVariantList() << transferId));
+
             break;
+        }
         case TransferEngineData::Sync:
             // Ok exit
             break;
@@ -451,8 +471,8 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
             notification.setReplacesId(notificationId);
         }
 
-        if (!m_defaultActions.isEmpty()) {
-            notification.setRemoteActions(m_defaultActions);
+        if (!actions.isEmpty()) {
+            notification.setRemoteActions(actions);
         }
 
         //: Group name for notifications of successful transfers
@@ -477,6 +497,7 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
         if (useProgress) {
             notification.setHintValue(TRANSFER_PROGRESS_HINT, static_cast<double>(progress));
         }
+
         notification.publish();
         int newId = notification.replacesId();
 
@@ -1407,4 +1428,34 @@ bool TransferEngine::notificationsEnabled()
     Q_D(TransferEngine);
     d->exitSafely();
     return d->m_notificationsEnabled;
+}
+
+/*!
+    DBus adaptor calls this method.
+    Opens the file with the given \a transferId.
+*/
+void TransferEngine::openTransfer(int transferId)
+{
+    Q_D(TransferEngine);
+    d->exitSafely();
+
+    MediaItem *item = DbManager::instance()->mediaItem(transferId);
+    if (!item) {
+        qCWarning(lcTransferLog) << "TransferEngine::openTransfer: failed to fetch media item from db!";
+        return;
+    }
+
+    const QUrl url = item->value(MediaItem::Url).toUrl();
+    if (url.scheme() != QStringLiteral("http") && url.scheme() != QStringLiteral("https")) {
+        QString filePath = url.toString();
+        if (filePath.startsWith('/')) {
+            filePath = QStringLiteral("file://%1").arg(filePath);
+        }
+        ContentAction::Action action = ContentAction::Action::defaultActionForFile(filePath);
+        if (action.isValid()) {
+            action.trigger();
+        } else {
+            qCWarning(lcTransferLog) << "TransferEngine::openTransfer() cannot find desktop action to open" << filePath;
+        }
+    }
 }
