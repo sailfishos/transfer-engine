@@ -188,7 +188,9 @@ TransferEnginePrivate::TransferEnginePrivate(TransferEngine *parent):
         settings.endGroup();
 
         if (!service.isEmpty() && !path.isEmpty() && !iface.isEmpty() && !method.isEmpty()) {
-            m_defaultActions << Notification::remoteAction("default", "", service, path, iface, method)
+            //: Show the list of transferred files
+            //% "Show transfers"
+            m_defaultActions << Notification::remoteAction("default", qtTrId("transferengine-la-show_transfers"), service, path, iface, method)
                              << Notification::remoteAction("app", "", service, path, iface, method);
         }
     }
