@@ -331,12 +331,10 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
     QString category;
     QString body;
     QString summary;
-    QString previewBody;
-    QString previewSummary;
+    bool showPreview = false;
     bool useProgress = false;
     Notification::Urgency urgency = Notification::Normal;
-    QString appIcon = QStringLiteral("icon-lock-information");
-    QString icon = QStringLiteral("icon-lock-transfer");
+    QString appIcon = QStringLiteral("icon-lock-transfer");
 
     // TODO: explicit grouping of transfer notifications is now removed, as grouping
     // will now be performed by lipstick.  We may need to reinstate group summary
@@ -356,13 +354,15 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
     int notificationId = DbManager::instance()->notificationId(transferId);
 
     if (status == TransferEngineData::TransferFinished) {
+        showPreview = true;
+
         switch(type) {
         case TransferEngineData::Upload:
+            category = TRANSFER_COMPLETE_EVENT_CATEGORY;
             //: Notification for successful file upload
             //% "File uploaded"
-            previewBody = qtTrId("transferengine-no-file-upload-success");
-            previewSummary = fileName;
-            category = TRANSFER_EVENT_CATEGORY; // Use "generic" transfer event for uploads
+            body = qtTrId("transferengine-no-file-upload-success");
+            summary = fileName;
             break;
         case TransferEngineData::Download:
             category = TRANSFER_COMPLETE_EVENT_CATEGORY;
@@ -370,8 +370,6 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
             //% "File downloaded"
             body = qtTrId("transferengine-no-file-download-success");
             summary = fileName;
-            previewBody = body;
-            previewSummary = summary;
             break;
         case TransferEngineData::Sync:
             // Ok exit
@@ -383,9 +381,7 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
 
     } else if (status == TransferEngineData::TransferInterrupted) {
         urgency = Notification::Critical;
-        appIcon = QStringLiteral("icon-lock-information");
         category = TRANSFER_ERROR_EVENT_CATEGORY;
-        icon.clear();
 
         switch (type) {
         case TransferEngineData::Upload:
@@ -409,8 +405,6 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
         }
 
         summary = fileName;
-        previewSummary = summary;
-        previewBody = body;
 
     } else if (status == TransferEngineData::TransferStarted) {
         if (type == TransferEngineData::Upload || type == TransferEngineData::Download) {
@@ -456,20 +450,20 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
         //: Group name for notifications of successful transfers
         //% "Transfers"
         const QString transfersGroup(qtTrId("transferengine-notification_group"));
-        //: Group name for notifications of failed transfers
-        //% "Warnings"
-        const QString errorsGroup(qtTrId("transferengine-notification_errors_group"));
 
         notification.setCategory(category);
-        notification.setAppName(category == TRANSFER_ERROR_EVENT_CATEGORY ? errorsGroup : transfersGroup);
+        notification.setAppName(transfersGroup);
         notification.setSummary(summary);
         notification.setBody(body);
-        notification.setPreviewSummary(previewSummary);
-        notification.setPreviewBody(previewBody);
         notification.setUrgency(urgency);
 
-        if (!icon.isEmpty()) {
-            notification.setIcon(icon);
+        if (!appIcon.isEmpty()) {
+            notification.setAppIcon(appIcon);
+        }
+
+        if (!showPreview) {
+            notification.clearPreviewSummary();
+            notification.clearPreviewBody();
         }
 
         if (useProgress) {
