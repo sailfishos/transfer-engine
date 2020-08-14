@@ -105,7 +105,8 @@ public:
                           TransferEngineData::TransferStatus status,
                           qreal progress,
                           const QString &fileName,
-                          int transferId);
+                          int transferId,
+                          bool canCancel);
     int uploadMediaItem(MediaItem *mediaItem,
                         MediaTransferInterface *muif,
                         const QVariantMap &userData);
