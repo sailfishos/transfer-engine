@@ -67,6 +67,7 @@ public:
     void activityFinished(int transferId);
 
     bool activeTransfers() const;
+    bool isActiveTransfer(int transferId) const;
 
 public Q_SLOTS:
     void checkActivity();

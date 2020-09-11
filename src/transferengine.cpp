@@ -121,6 +121,11 @@ bool ClientActivityMonitor::activeTransfers() const
     return !m_activityMap.isEmpty();
 }
 
+bool ClientActivityMonitor::isActiveTransfer(int transferId) const
+{
+    return m_activityMap.contains(transferId);
+}
+
 void ClientActivityMonitor::checkActivity()
 {
     // Check if there are existing transfers which are not yet finished and
@@ -293,7 +298,9 @@ void TransferEnginePrivate::cleanupExpiredTransfers(const QList<int> &expiredIds
     Q_Q(TransferEngine);
     Q_FOREACH(int id, expiredIds) {
         if (DbManager::instance()->updateTransferStatus(id, TransferEngineData::TransferInterrupted)) {
-            m_activityMonitor->activityFinished(id);
+            if (m_activityMonitor->isActiveTransfer(id)) {
+                m_activityMonitor->activityFinished(id);
+            }
             emit q->statusChanged(id, TransferEngineData::TransferInterrupted);
         }
     }
@@ -1200,7 +1207,9 @@ void TransferEngine::finishTransfer(int transferId, int status, const QString &r
         transferStatus == TransferEngineData::TransferInterrupted) {
         DbManager::instance()->updateTransferStatus(transferId, transferStatus);
         d->sendNotification(type, transferStatus, DbManager::instance()->transferProgress(transferId), fileName, transferId, false);
-        d->m_activityMonitor->activityFinished(transferId);
+        if (m_activityMonitor->isActiveTransfer(transferId)) {
+            d->m_activityMonitor->activityFinished(transferId);
+        }
         emit statusChanged(transferId, status);
 
         bool notify = false;
