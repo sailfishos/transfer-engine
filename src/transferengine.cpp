@@ -831,6 +831,8 @@ TransferEngine::TransferEngine(QObject *parent) :
     TransferDBRecord::registerType();
     TransferPluginInfo::registerType();
 
+    new TransferEngineAdaptor(this);
+
     QDBusConnection connection = QDBusConnection::sessionBus();
     if (!connection.registerObject("/org/nemo/transferengine", this)) {
         qFatal("Could not register object \'/org/nemo/transferengine\'");
@@ -839,8 +841,6 @@ TransferEngine::TransferEngine(QObject *parent) :
     if (!connection.registerService("org.nemo.transferengine")) {
         qFatal("DBUS service already taken. Kill the other instance first.");
     }
-
-    new TransferEngineAdaptor(this);
 
     // Let's make sure that db is open by creating
     // DbManager singleton instance.
