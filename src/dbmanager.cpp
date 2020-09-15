@@ -911,6 +911,10 @@ MediaItem * DbManager::mediaItem(int key) const
         item->setValue(MediaItem::AccountId,       query.value(rec.indexOf("account_id")));
         item->setValue(MediaItem::DisplayName,     query.value(rec.indexOf("display_name")));
         item->setValue(MediaItem::ServiceIcon,     query.value(rec.indexOf("service_icon")));
+        item->setValue(MediaItem::ApplicationIcon, query.value(rec.indexOf("application_icon")));
+        item->setValue(MediaItem::ThumbnailIcon,   query.value(rec.indexOf("thumbnail_icon")));
+        item->setValue(MediaItem::CancelSupported, query.value(rec.indexOf("cancel_supported")));
+        item->setValue(MediaItem::RestartSupported, query.value(rec.indexOf("restart_supported")));
     } else {
         qWarning() << "DbManager::mediaItem: Failed to get media item data from database!";
         delete item;

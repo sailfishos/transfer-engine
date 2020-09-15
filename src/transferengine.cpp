@@ -121,6 +121,11 @@ bool ClientActivityMonitor::activeTransfers() const
     return !m_activityMap.isEmpty();
 }
 
+bool ClientActivityMonitor::isActiveTransfer(int transferId) const
+{
+    return m_activityMap.contains(transferId);
+}
+
 void ClientActivityMonitor::checkActivity()
 {
     // Check if there are existing transfers which are not yet finished and
@@ -293,7 +298,9 @@ void TransferEnginePrivate::cleanupExpiredTransfers(const QList<int> &expiredIds
     Q_Q(TransferEngine);
     Q_FOREACH(int id, expiredIds) {
         if (DbManager::instance()->updateTransferStatus(id, TransferEngineData::TransferInterrupted)) {
-            m_activityMonitor->activityFinished(id);
+            if (m_activityMonitor->isActiveTransfer(id)) {
+                m_activityMonitor->activityFinished(id);
+            }
             emit q->statusChanged(id, TransferEngineData::TransferInterrupted);
         }
     }
@@ -322,7 +329,8 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
                                              TransferEngineData::TransferStatus status,
                                              qreal progress,
                                              const QString &fileName,
-                                             int transferId)
+                                             int transferId,
+                                             bool canCancel)
 {
     if (!m_notificationsEnabled || fileName.isEmpty()) {
         return;
@@ -335,6 +343,7 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
     bool useProgress = false;
     Notification::Urgency urgency = Notification::Normal;
     QString appIcon = QStringLiteral("icon-lock-transfer");
+    QVariantList remoteActions = m_defaultActions;
 
     // TODO: explicit grouping of transfer notifications is now removed, as grouping
     // will now be performed by lipstick.  We may need to reinstate group summary
@@ -349,7 +358,6 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
     // Show an event in the EventView:
     // - For downloads
     // - For failed uploads, downloads and syncs
-
 
     int notificationId = DbManager::instance()->notificationId(transferId);
 
@@ -424,6 +432,18 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
 
             if (progress > 0)
                 useProgress = true;
+
+            if (canCancel) {
+                remoteActions.append(Notification::remoteAction(QString(),
+                                                                //: Cancel the file transfer
+                                                                //% "Cancel"
+                                                                qtTrId("transferengine-no-cancel"),
+                                                                "org.nemo.transferengine",
+                                                                "/org/nemo/transferengine",
+                                                                "org.nemo.transferengine",
+                                                                "cancelTransfer",
+                                                                QVariantList() << transferId));
+            }
         }
 
     } else if (status == TransferEngineData::TransferCanceled && notificationId > 0) {
@@ -443,8 +463,8 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
             notification.setReplacesId(notificationId);
         }
 
-        if (!m_defaultActions.isEmpty()) {
-            notification.setRemoteActions(m_defaultActions);
+        if (!remoteActions.isEmpty()) {
+            notification.setRemoteActions(remoteActions);
         }
 
         //: Group name for notifications of successful transfers
@@ -626,7 +646,7 @@ void TransferEnginePrivate::uploadItemStatusChanged(MediaTransferInterface::Tran
         // If the flow ends up here, we are not interested in any signals the same object
         // might emit. Let's just disconnect them.
         muif->disconnect();
-        sendNotification(type, tStatus, muif->progress(), mediaFileOrResourceName(muif->mediaItem()), key);
+        sendNotification(type, tStatus, muif->progress(), mediaFileOrResourceName(muif->mediaItem()), key, false);
         ok = DbManager::instance()->updateTransferStatus(key, tStatus);
         if (m_plugins.remove(muif) == 0) {
             qCWarning(lcTransferLog) << "TransferEnginePrivate::uploadItemStatusChanged: Failed to remove media upload object from the map!";
@@ -818,6 +838,8 @@ TransferEngine::TransferEngine(QObject *parent) :
     TransferDBRecord::registerType();
     TransferPluginInfo::registerType();
 
+    new TransferEngineAdaptor(this);
+
     QDBusConnection connection = QDBusConnection::sessionBus();
     if (!connection.registerObject("/org/nemo/transferengine", this)) {
         qFatal("Could not register object \'/org/nemo/transferengine\'");
@@ -826,8 +848,6 @@ TransferEngine::TransferEngine(QObject *parent) :
     if (!connection.registerService("org.nemo.transferengine")) {
         qFatal("DBUS service already taken. Kill the other instance first.");
     }
-
-    new TransferEngineAdaptor(this);
 
     // Let's make sure that db is open by creating
     // DbManager singleton instance.
@@ -1186,8 +1206,10 @@ void TransferEngine::finishTransfer(int transferId, int status, const QString &r
         transferStatus == TransferEngineData::TransferCanceled ||
         transferStatus == TransferEngineData::TransferInterrupted) {
         DbManager::instance()->updateTransferStatus(transferId, transferStatus);
-        d->sendNotification(type, transferStatus, DbManager::instance()->transferProgress(transferId), fileName, transferId);
-        d->m_activityMonitor->activityFinished(transferId);
+        d->sendNotification(type, transferStatus, DbManager::instance()->transferProgress(transferId), fileName, transferId, false);
+        if (m_activityMonitor->isActiveTransfer(transferId)) {
+            d->m_activityMonitor->activityFinished(transferId);
+        }
         emit statusChanged(transferId, status);
 
         bool notify = false;
@@ -1241,7 +1263,8 @@ void TransferEngine::updateTransferProgress(int transferId, double progress)
         emit progressChanged(transferId, progress);
 
         if (oldProgressPercentage != (progress * 100)) {
-            d->sendNotification(type, DbManager::instance()->transferStatus(transferId), progress, fileName, transferId);
+            bool canCancel = mediaItem->value(MediaItem::CancelSupported).toBool();
+            d->sendNotification(type, DbManager::instance()->transferStatus(transferId), progress, fileName, transferId, canCancel);
         }
     } else {
          qCWarning(lcTransferLog) << "TransferEngine::updateTransferProgress: Failed to update progress for " << transferId;
