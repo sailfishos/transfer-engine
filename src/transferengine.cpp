@@ -1207,7 +1207,7 @@ void TransferEngine::finishTransfer(int transferId, int status, const QString &r
         transferStatus == TransferEngineData::TransferInterrupted) {
         DbManager::instance()->updateTransferStatus(transferId, transferStatus);
         d->sendNotification(type, transferStatus, DbManager::instance()->transferProgress(transferId), fileName, transferId, false);
-        if (m_activityMonitor->isActiveTransfer(transferId)) {
+        if (d->m_activityMonitor->isActiveTransfer(transferId)) {
             d->m_activityMonitor->activityFinished(transferId);
         }
         emit statusChanged(transferId, status);
