@@ -434,7 +434,11 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
                 useProgress = true;
 
             if (canCancel) {
-                remoteActions.append(Notification::remoteAction(QString(),
+                // Use a constant action name instead of an auto-generated one which is different
+                // every time, to avoid excessive changes to the action data which disrupts the UI.
+                static const QString cancelActionName = QStringLiteral("transferengine_cancel_transfer");
+
+                remoteActions.append(Notification::remoteAction(cancelActionName,
                                                                 //: Cancel the file transfer
                                                                 //% "Cancel"
                                                                 qtTrId("transferengine-no-cancel"),
