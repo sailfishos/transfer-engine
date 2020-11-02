@@ -171,7 +171,7 @@ TransferEnginePrivate::TransferEnginePrivate(TransferEngine *parent):
     connect(m_accountManager, SIGNAL(accountRemoved(Accounts::AccountId)), this, SLOT(enabledPluginsCheck()));
     connect(m_accountManager, SIGNAL(accountUpdated(Accounts::AccountId)), this, SLOT(enabledPluginsCheck()));
 
-    // Exit safely stuff if we recieve certain signal or there are no active transfers
+    // Exit safely stuff if we receive certain signal or there are no active transfers
     Q_Q(TransferEngine);
     connect(TransferEngineSignalHandler::instance(), SIGNAL(exitSafely()), this, SLOT(exitSafely()));
     connect(q, SIGNAL(statusChanged(int,int)), this, SLOT(exitSafely()));
@@ -486,8 +486,7 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
         }
 
         if (!showPreview) {
-            notification.clearPreviewSummary();
-            notification.clearPreviewBody();
+            notification.setUrgency(Notification::Low);
         }
 
         if (useProgress) {
