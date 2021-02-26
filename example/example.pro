@@ -23,7 +23,7 @@ OTHER_FILES += \
 shareui.files = *.qml
 shareui.path = /usr/share/nemo-transferengine/plugins
 
-target.path = /usr/lib/nemo-transferengine/plugins
+target.path = $$LIBDIR/nemo-transferengine/plugins
 INSTALLS += target shareui
 
 # NOTE: the translations here assume that generic sharing UI system will pick up the
@@ -57,7 +57,7 @@ engineering_english_install.path = /usr/share/translations/nemotransferengine
 engineering_english_install.files = $$EE_QM
 engineering_english_install.CONFIG += no_check_exist
 
-TS_FI_FILE = translations/example_share_plugin-fi.ts
+TS_FI_FILE = $$PWD/translations/example_share_plugin-fi.ts
 QM_FI_FILE = example_share_plugin-fi.qm
 
 finnish.commands += lrelease -idbased $$TS_FI_FILE -qm $$QM_FI_FILE
@@ -77,5 +77,5 @@ PRE_TARGETDEPS += ts engineering_english finnish
 INSTALLS += ts_install engineering_english_install finnish_install
 
 OTHER_FILES += \
-    rpm/*
+    rpm/* \
     translations/*
