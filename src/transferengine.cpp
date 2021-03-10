@@ -330,7 +330,8 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
                                              qreal progress,
                                              const QString &fileName,
                                              int transferId,
-                                             bool canCancel)
+                                             bool canCancel,
+                                             const QUrl &localFileUrl)
 {
     if (!m_notificationsEnabled || fileName.isEmpty()) {
         return;
@@ -378,6 +379,17 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
             //% "File downloaded"
             body = qtTrId("transferengine-no-file-download-success");
             summary = fileName;
+            if (!localFileUrl.isEmpty()) {
+                remoteActions.append(Notification::remoteAction(QString(),
+                                                                //: Open a downloaded file
+                                                                //% "Open"
+                                                                qtTrId("transferengine-no-open"),
+                                                                "org.sailfishos.fileservice",
+                                                                "/",
+                                                                "org.sailfishos.fileservice",
+                                                                "openUrl",
+                                                                QVariantList() << localFileUrl.toString()));
+            }
             break;
         case TransferEngineData::Sync:
             // Ok exit
@@ -492,6 +504,7 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
         if (useProgress) {
             notification.setHintValue(TRANSFER_PROGRESS_HINT, static_cast<double>(progress));
         }
+
         notification.publish();
         int newId = notification.replacesId();
 
@@ -1194,6 +1207,8 @@ void TransferEngine::finishTransfer(int transferId, int status, const QString &r
     }
 
     QString fileName;
+    QUrl localFileUrl;
+
     // Read the file path from the database for download
     if (type == TransferEngineData::Download) {
         MediaItem *mediaItem = DbManager::instance()->mediaItem(transferId);
@@ -1202,6 +1217,13 @@ void TransferEngine::finishTransfer(int transferId, int status, const QString &r
             return;
         }
         fileName = d->mediaFileOrResourceName(mediaItem);
+        QString mediaUrl = mediaItem->value(MediaItem::Url).toString();
+
+        if (mediaUrl.startsWith(QLatin1String("/"))) {
+            localFileUrl = QUrl::fromLocalFile(mediaUrl);
+        } else if (mediaUrl.startsWith(QLatin1String("file://"))) {
+            localFileUrl = QUrl(mediaUrl);
+        }
     }
 
     TransferEngineData::TransferStatus transferStatus = static_cast<TransferEngineData::TransferStatus>(status);
@@ -1209,7 +1231,8 @@ void TransferEngine::finishTransfer(int transferId, int status, const QString &r
         transferStatus == TransferEngineData::TransferCanceled ||
         transferStatus == TransferEngineData::TransferInterrupted) {
         DbManager::instance()->updateTransferStatus(transferId, transferStatus);
-        d->sendNotification(type, transferStatus, DbManager::instance()->transferProgress(transferId), fileName, transferId, false);
+        d->sendNotification(type, transferStatus, DbManager::instance()->transferProgress(transferId), fileName, transferId, false, localFileUrl);
+
         if (d->m_activityMonitor->isActiveTransfer(transferId)) {
             d->m_activityMonitor->activityFinished(transferId);
         }
