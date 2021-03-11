@@ -193,8 +193,10 @@ TransferEnginePrivate::TransferEnginePrivate(TransferEngine *parent):
         settings.endGroup();
 
         if (!service.isEmpty() && !path.isEmpty() && !iface.isEmpty() && !method.isEmpty()) {
-            m_defaultActions << Notification::remoteAction("default", "", service, path, iface, method)
-                             << Notification::remoteAction("app", "", service, path, iface, method);
+            m_defaultActions << Notification::remoteAction("default", QString(), service, path, iface, method);
+            //% "Show transfers"
+            m_showTransfersAction = Notification::remoteAction(QString(), qtTrId("transferengine-no-show_transfers"),
+                                                               service, path, iface, method);
         }
     }
 }
@@ -380,15 +382,15 @@ void TransferEnginePrivate::sendNotification(TransferEngineData::TransferType ty
             body = qtTrId("transferengine-no-file-download-success");
             summary = fileName;
             if (!localFileUrl.isEmpty()) {
-                remoteActions.append(Notification::remoteAction(QString(),
-                                                                //: Open a downloaded file
-                                                                //% "Open"
-                                                                qtTrId("transferengine-no-open"),
+                remoteActions.clear();
+                remoteActions.append(Notification::remoteAction(QLatin1String("default"),
+                                                                QString(),
                                                                 "org.sailfishos.fileservice",
                                                                 "/",
                                                                 "org.sailfishos.fileservice",
                                                                 "openUrl",
                                                                 QVariantList() << localFileUrl.toString()));
+                remoteActions.append(m_showTransfersAction);
             }
             break;
         case TransferEngineData::Sync:

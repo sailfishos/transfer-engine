@@ -147,6 +147,7 @@ private:
     ClientActivityMonitor *m_activityMonitor;
     TransferEngine *q_ptr;
     QVariantList m_defaultActions;
+    QVariant m_showTransfersAction;
     Q_DECLARE_PUBLIC(TransferEngine)
 };
 
