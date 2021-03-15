@@ -107,7 +107,8 @@ public:
                           qreal progress,
                           const QString &fileName,
                           int transferId,
-                          bool canCancel);
+                          bool canCancel,
+                          const QUrl &localFileUrl = QUrl());
     int uploadMediaItem(MediaItem *mediaItem,
                         MediaTransferInterface *muif,
                         const QVariantMap &userData);
@@ -146,6 +147,7 @@ private:
     ClientActivityMonitor *m_activityMonitor;
     TransferEngine *q_ptr;
     QVariantList m_defaultActions;
+    QVariant m_showTransfersAction;
     Q_DECLARE_PUBLIC(TransferEngine)
 };
 
