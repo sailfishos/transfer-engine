@@ -1,6 +1,6 @@
 /******************************************************************************
-Copyright (c) <2014>, Jolla Ltd.
-Contact: Marko Mattila <marko.mattila@jolla.com>
+Copyright (c) 2014 - 2021 Jolla Ltd.
+Copyright (c) Open Mobile Platform LLC.
 
 All rights reserved.
 
@@ -27,61 +27,58 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import org.nemomobile.thumbnailer 1.0
 import Sailfish.TransferEngine 1.0
 
-ShareDialog {
+SilicaFlickable {
     id: root
 
-    property int viewWidth: root.isPortrait ? Screen.width : Screen.width / 2
+    property var sailfishTransfer
 
-    onAccepted: {
-        shareItem.start()
-    }
+    width: Screen.width
+    height: Math.min(Screen.height, contentHeight)
+    contentHeight: contentColumn.height
 
-    Thumbnail {
-        id: thumbnail
-        width: viewWidth
-        height: parent.height / 2
-        source: root.source
-        sourceSize.width: Screen.width
-        sourceSize.height: Screen.height / 2
-    }
+    Column {
+        id: contentColumn
 
-    Item {
-        anchors {
-            top: root.isPortrait ? thumbnail.bottom : parent.top
-            left: root.isPortrait ? parent.left: thumbnail.right
-            right: parent.right
-            bottom: parent.bottom
+        width: parent.width
+        spacing: Theme.paddingLarge
+        bottomPadding: Theme.paddingLarge
+
+        Thumbnail {
+            width: Screen.width
+            height: Screen.height / 2
+            source: root.sailfishTransfer.source
+            sourceSize.width: Screen.width
+            sourceSize.height: Screen.height / 2
         }
 
         Label {
-            anchors.centerIn:parent
-            width: viewWidth
+            width: Screen.width
             //: Label for example share UI
             //% "Example Test Share UI"
             text: qsTrId("example-test-share-ui-la-id")
             horizontalAlignment: Text.AlignHCenter
         }
-    }
 
-    SailfishShare {
-        id: shareItem
-        source: root.source
-        metadataStripped: true
-        serviceId: root.methodId
-        userData: {"description": "Random Text which can be what ever",
-                   "accountId": root.accountId,
-                   "scalePercent": root.scalePercent}
-    }
+        Button {
+            anchors.horizontalCenter: parent.horizontalCenter
+            //% "Start"
+            text: qsTrId("example-test-share-ui-la-start")
 
-    DialogHeader {
-        //: Header for example share plugin
-        //% "Example Share"
-        acceptText: qsTrId("example-share-he-id")
+            onClicked: {
+                sailfishTransfer.metadataStripped = true
+                sailfishTransfer.userData = {
+                    "description": "Random Text which can be what ever",
+                    "accountId": root.sailfishTransfer.transferMethodInfo.accountId,
+                    "scalePercent": 0.5
+                }
+                sailfishTransfer.start()
+            }
+        }
     }
 }
 
