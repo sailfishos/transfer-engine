@@ -114,5 +114,34 @@ private:
     Q_DECLARE_PRIVATE(TransferEngine)
 };
 
+// registered on the session bus
+class DiscoveryObject : public QObject
+{
+    Q_OBJECT
+    Q_CLASSINFO("D-Bus Interface", "org.nemo.transferengine.discovery")
+    Q_CLASSINFO("D-Bus Introspection", ""
+    "  <interface name=\"org.nemo.transferengine.discovery\">\n"
+    "      <method name=\"peerToPeerAddress\">\n"
+    "          <arg name=\"address\" type=\"s\" direction=\"out\" />\n"
+    "      </method>\n"
+    "  </interface>\n"
+    "")
+
+public:
+    DiscoveryObject(const QString &p2pAddress = QString(),
+                    QObject *parent = nullptr);
+
+    bool registerObject(const QString &serviceName = QString::fromLatin1("org.nemo.transferengine.discovery"),
+                        const QString &objectPath = QString::fromLatin1("/"));
+
+    void setPeerToPeerAddress(const QString &p2pAddress);
+
+public Q_SLOTS:
+    QString peerToPeerAddress() const;
+
+private:
+    QString m_p2pAddress;
+    bool m_registered = false;
+};
 
 #endif // TRANSFERENGINE_H

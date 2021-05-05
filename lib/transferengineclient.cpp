@@ -25,6 +25,29 @@
 #include "transferengineclient.h"
 #include "transferengineinterface.h"
 
+#include <QStandardPaths>
+
+namespace {
+    QString p2pSocketAddress()
+    {
+        const QString path = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
+        if (path.isEmpty()) {
+            qWarning() << "No writable runtime directory found, cannot create socket file";
+            return QString();
+        }
+
+        QDir dir(path);
+        if (!dir.mkpath(dir.absolutePath())) {
+            qWarning() << "Could not create socket file directory";
+            return QString();
+        }
+
+        const QString socketFile = QString::fromUtf8("%1/%2").arg(dir.absolutePath(), QLatin1String("transfer-engine.socket"));
+        const QString address = QString::fromUtf8("unix:path=%1").arg(socketFile);
+
+        return address;
+    }
+}
 
 class CallbackInterfacePrivate {
 public:
@@ -183,10 +206,18 @@ TransferEngineClient::TransferEngineClient(QObject *parent) :
     d_ptr(new TransferEngineClientPrivate)
 {
     Q_D(TransferEngineClient);
-    d->m_client = new TransferEngineInterface("org.nemo.transferengine",
-                                              "/org/nemo/transferengine",
-                                              QDBusConnection::sessionBus(),
-                                              this);
+
+    QDBusMessage msg = QDBusMessage::createMethodCall(
+            "org.nemo.transferengine.discovery",
+            "/",
+            "org.nemo.transferengine.discovery",
+            "peerToPeerAddress");
+    QDBusConnection::sessionBus().callWithCallback(
+            msg,
+            this,
+            SLOT(discoverySucceeded(QString)),
+            SLOT(discoveryFailed()),
+            15000); // allow 15 seconds for the transfer engine to start.
 }
 
 TransferEngineClient::~TransferEngineClient()
@@ -195,6 +226,30 @@ TransferEngineClient::~TransferEngineClient()
     delete d->m_client;
     delete d_ptr;
     d_ptr = 0;
+}
+
+void TransferEngineClient::discoveryFailed()
+{
+    qWarning() << "Failed to discover transfer-engine p2p address";
+}
+
+void TransferEngineClient::discoverySucceeded(const QString &p2pAddress)
+{
+    Q_D(TransferEngineClient);
+    static int connectionCount = 0;
+    const QString name = QString::fromLatin1("transfer-engine-connection-%1").arg(connectionCount++);
+    QDBusConnection p2pc = QDBusConnection::connectToPeer(p2pAddress, name);
+    if (!p2pc.isConnected()) {
+        qWarning() << "Unable to connect to transfer-engine on address:"
+                   << p2pAddress << ":" << p2pc.lastError()
+                   << p2pc.lastError().type() << p2pc.lastError().name();
+    } else {
+        d->m_client = new TransferEngineInterface(
+                "org.nemo.transferengine",
+                "/org/nemo/transferengine",
+                p2pc,
+                this);
+    }
 }
 
 /*!

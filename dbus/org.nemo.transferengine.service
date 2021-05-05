@@ -1,5 +1,5 @@
 [D-BUS Service]
-Interface=/org/nemo/transferengine
-Name=org.nemo.transferengine
+Interface=/
+Name=org.nemo.transferengine.discovery
 Exec=/usr/bin/invoker --type=qt5 --global-syms /usr/bin/nemo-transfer-engine
 SystemdService=transferengine.service

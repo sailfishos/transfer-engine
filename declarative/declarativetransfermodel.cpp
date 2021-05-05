@@ -173,8 +173,6 @@ void TransferModel::classBegin()
 
 void TransferModel::componentComplete()
 {
-    m_complete = true;
-
     m_roles[TransferDBRecord::TransferID]         = "transferId";
     m_roles[TransferDBRecord::TransferType]       = "transferType";
     m_roles[TransferDBRecord::Progress]           = "progress";
@@ -192,19 +190,50 @@ void TransferModel::componentComplete()
     m_roles[TransferDBRecord::CancelSupported]    = "cancelEnabled";
     m_roles[TransferDBRecord::RestartSupported]   = "restartEnabled";
 
+    QDBusMessage msg = QDBusMessage::createMethodCall(
+            "org.nemo.transferengine.discovery",
+            "/",
+            "org.nemo.transferengine.discovery",
+            "peerToPeerAddress");
+    QDBusConnection::sessionBus().callWithCallback(
+            msg,
+            this,
+            SLOT(discoverySucceeded(QString)),
+            SLOT(discoveryFailed()),
+            15000); // allow 15 seconds for the transfer engine to start.
+}
+
+void TransferModel::discoveryFailed()
+{
+    qWarning() << "Unable to discover transfer-engine IPC socket address";
+}
+
+void TransferModel::discoverySucceeded(const QString &p2pAddress)
+{
+    m_complete = true;
     refresh();
 
-    m_client = new TransferEngineInterface("org.nemo.transferengine",
-                                           "/org/nemo/transferengine",
-                                           QDBusConnection::sessionBus(),
-                                           this);
+    static int connectionCount = 0;
+    const QString name = QString::fromLatin1("transfer-engine-connection-dtm-%1").arg(connectionCount++);
+    QDBusConnection p2pc = QDBusConnection::connectToPeer(p2pAddress, name);
+    if (!p2pc.isConnected()) {
+        qWarning() << "Unable to connect to transfer-engine on address:"
+                   << p2pAddress << ":" << p2pc.lastError()
+                   << p2pc.lastError().type() << p2pc.lastError().name();
+    } else {
+        m_client = new TransferEngineInterface(
+                "org.nemo.transferengine",
+                "/org/nemo/transferengine",
+                p2pc,
+                this);
 
-    connect(m_client,   SIGNAL(progressChanged(int,double)),
-            this,       SLOT(refresh()));
-    connect(m_client,   SIGNAL(transfersChanged()),
-            this,       SLOT(refresh()));
-    connect(m_client,   SIGNAL(statusChanged(int,int)),
-            this,       SLOT(refresh()));
+        connect(m_client,   SIGNAL(progressChanged(int,double)),
+                this,       SLOT(refresh()));
+        connect(m_client,   SIGNAL(transfersChanged()),
+                this,       SLOT(refresh()));
+        connect(m_client,   SIGNAL(statusChanged(int,int)),
+                this,       SLOT(refresh()));
+    }
 }
 
 void TransferModel::insertRange(

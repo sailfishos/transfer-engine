@@ -37,9 +37,11 @@
 #include <QtDebug>
 #include <QPluginLoader>
 #include <QDBusMessage>
+#include <QDBusServer>
 #include <QFileSystemWatcher>
 #include <QTimer>
 #include <QSettings>
+#include <QStandardPaths>
 
 #include <notification.h>
 
@@ -57,6 +59,28 @@
 #define TRANSFER_ERROR_EVENT_CATEGORY "transfer.error"
 
 #define TRANSFER_PROGRESS_HINT "x-nemo-progress"
+
+namespace {
+    QString p2pSocketAddress()
+    {
+        const QString path = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
+        if (path.isEmpty()) {
+            qWarning() << "No writable runtime directory found, cannot create socket file";
+            return QString();
+        }
+
+        QDir dir(path);
+        if (!dir.mkpath(dir.absolutePath())) {
+            qWarning() << "Could not create socket file directory";
+            return QString();
+        }
+
+        const QString socketFile = QString::fromUtf8("%1/%2").arg(dir.absolutePath(), QLatin1String("transfer-engine.socket"));
+        const QString address = QString::fromUtf8("unix:path=%1").arg(socketFile);
+
+        return address;
+    }
+}
 
 TransferEngineSignalHandler * TransferEngineSignalHandler::instance()
 {
@@ -858,21 +882,26 @@ TransferEngine::TransferEngine(QObject *parent) :
 
     new TransferEngineAdaptor(this);
 
-    QDBusConnection connection = QDBusConnection::sessionBus();
-    if (!connection.registerObject("/org/nemo/transferengine", this)) {
-        qFatal("Could not register object \'/org/nemo/transferengine\'");
-    }
-
-    if (!connection.registerService("org.nemo.transferengine")) {
-        qFatal("DBUS service already taken. Kill the other instance first.");
-    }
+    const QString p2pAddress = p2pSocketAddress();
+    new DiscoveryObject(p2pAddress, this);
+    QDBusServer *dbusServer = new QDBusServer(p2pAddress, this);
+    connect(dbusServer, &QDBusServer::newConnection,
+            this, [this, p2pAddress](const QDBusConnection &clientConnection) {
+                QDBusConnection connection(clientConnection);
+                if (!connection.registerObject("/org/nemo/transferengine", this)) {
+                    qWarning() << "Could not register object on p2p connection:" << p2pAddress;
+                } else {
+                    connection.registerService("org.nemo.transferengine");
+                    qDebug() << "Registered p2p object with the client connection:" << p2pAddress;
+                }
+            });
 
     // Let's make sure that db is open by creating
     // DbManager singleton instance.
     DbManager::instance();
     Q_D(TransferEngine);
     d->recoveryCheck();
-    d->enabledPluginsCheck();    
+    d->enabledPluginsCheck();
 }
 
 /*!
@@ -1450,4 +1479,45 @@ bool TransferEngine::notificationsEnabled()
     Q_D(TransferEngine);
     d->exitSafely();
     return d->m_notificationsEnabled;
+}
+
+DiscoveryObject::DiscoveryObject(
+        const QString &p2pAddress,
+        QObject *parent)
+    : QObject(parent)
+    , m_p2pAddress(p2pAddress)
+{
+    registerObject();
+}
+
+bool DiscoveryObject::registerObject(
+        const QString &serviceName,
+        const QString &objectPath)
+{
+    if (m_registered) {
+        return true;
+    }
+
+    if (!QDBusConnection::sessionBus().registerObject(objectPath, this, QDBusConnection::ExportAllSlots)) {
+        qWarning() << "Unable to register session bus service:" << serviceName << "at path:" << objectPath;
+        qFatal("transfer-engine discovery object unable to be registered on session bus!");
+    }
+
+    if (!QDBusConnection::sessionBus().registerService(serviceName)) {
+        qWarning() << "Unable to register session bus service:" << serviceName;
+        qFatal("transfer-engine discovery service unable to be registered on session bus!");
+    }
+
+    m_registered = true;
+    return true;
+}
+
+void DiscoveryObject::setPeerToPeerAddress(const QString &p2pAddress)
+{
+    m_p2pAddress = p2pAddress;
+}
+
+QString DiscoveryObject::peerToPeerAddress() const
+{
+    return m_p2pAddress;
 }

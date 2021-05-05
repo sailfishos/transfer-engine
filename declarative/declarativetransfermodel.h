@@ -109,6 +109,10 @@ signals:
     void countChanged();
     void transfersInProgressChanged();
 
+private slots:
+    void discoveryFailed();
+    void discoverySucceeded(const QString &p2pAddress);
+
 private:
     void run();
     bool executeQuery(QVector<TransferDBRecord> *rows, int *activeTransfers, QString *errorString);

@@ -6,5 +6,5 @@ Requires=dbus.socket booster-qt5.service
 [Service]
 Type=dbus
 ExecStart=/usr/bin/invoker --type=qt5 --global-syms /usr/bin/nemo-transfer-engine
-BusName=org.nemo.transferengine
+BusName=org.nemo.transferengine.discovery
 

@@ -84,6 +84,10 @@ private:
     void enableNotifications(bool enable);
     bool notificationsEnabled() const;
 
+private Q_SLOTS:
+    void discoveryFailed();
+    void discoverySucceeded(const QString &p2pAddress);
+
 private:
     TransferEngineClientPrivate *d_ptr;
     Q_DECLARE_PRIVATE(TransferEngineClient)
