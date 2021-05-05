@@ -1,6 +1,6 @@
 /******************************************************************************
 Copyright (c) 2014 - 2021 Jolla Ltd.
-Copyright (c) Open Mobile Platform LLC.
+Copyright (c) 2021 Open Mobile Platform LLC.
 
 All rights reserved.
 

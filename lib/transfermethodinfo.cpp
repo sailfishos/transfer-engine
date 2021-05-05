@@ -25,6 +25,12 @@
 #include "transfermethodinfo.h"
 #include "metatypedeclarations.h"
 
+namespace {
+
+const QString KeySupportsMultipleFiles = "SupportsMultipleFiles";
+
+}
+
 /*!
     \class TransferMethodInfo
     \brief The TransferMethodInfo class encapsulate information of a single transfer method.
@@ -176,9 +182,21 @@ QVariant TransferMethodInfo::value(int index) const
         return accountId;
     case AccountIcon:
         return accountIcon;
+    case SupportsMultipleFiles:
+        return supportsMultipleFiles();
     default:
         return QVariant();
     }
+}
+
+void TransferMethodInfo::setSupportsMultipleFiles(bool supportsMultipleFiles)
+{
+    hints.insert(KeySupportsMultipleFiles, supportsMultipleFiles);
+}
+
+bool TransferMethodInfo::supportsMultipleFiles() const
+{
+    return hints.value(KeySupportsMultipleFiles).toBool();
 }
 
 QDBusArgument &operator<<(QDBusArgument &argument, const TransferMethodInfoDeprecated &info)
