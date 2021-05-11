@@ -56,7 +56,8 @@ public:
         AccountId,       // id the account, needed in a case of multiple accounts
         AccountIcon,     // account icon source url
         ShareUIPath,     // path to the share ui QML plugin
-        Capabilities     // list of supported mimetypes
+        Capabilities,    // list of supported mimetypes
+        SupportsMultipleFiles
     };
 
     TransferMethodInfo();
@@ -70,6 +71,9 @@ public:
     static void registerType();
 
     QVariant value(int index) const;
+
+    void setSupportsMultipleFiles(bool supportsMultipleFiles);
+    bool supportsMultipleFiles() const;
 
     QString displayName;
     QString userName;
