@@ -933,7 +933,12 @@ int TransferEngine::uploadMediaItem(const QString &source,
         return -1;
     }
 
+    // Consistently provide plugins with a file:/// url.
     QUrl filePath(source);
+    if (!filePath.isLocalFile()) {
+        filePath = QUrl::fromLocalFile(source);
+    }
+
     QFileInfo fileInfo(filePath.toLocalFile());
     if (!fileInfo.exists()) {
         qCWarning(lcTransferLog) << "TransferEnginePrivate::uploadMediaItem file " << source << " doesn't exist!";
@@ -976,12 +981,21 @@ int TransferEngine::uploadMediaItemContent(const QVariantMap &content,
     }
 
     MediaItem *mediaItem = new MediaItem(muif);
-    mediaItem->setValue(MediaItem::ContentData,     content.value("data"));
-    mediaItem->setValue(MediaItem::ResourceName,    content.value("name"));
-    mediaItem->setValue(MediaItem::MimeType,        content.value("type"));
-    mediaItem->setValue(MediaItem::ThumbnailIcon,   content.value("icon"));
-    mediaItem->setValue(MediaItem::PluginId,        serviceId);
-    mediaItem->setValue(MediaItem::UserData,        userData);
+    mediaItem->setValue(MediaItem::ContentData, content.value("data"));
+    mediaItem->setValue(MediaItem::ResourceName, content.value("name"));
+    mediaItem->setValue(MediaItem::MimeType, content.value("type"));
+    mediaItem->setValue(MediaItem::ThumbnailIcon, content.value("icon"));
+    mediaItem->setValue(MediaItem::MetadataStripped, content.value("metadataStripped"));
+    mediaItem->setValue(MediaItem::PluginId, serviceId);
+    mediaItem->setValue(MediaItem::UserData, userData);
+
+    if (content.contains("fileDescriptor")) {
+        mediaItem->setValue(MediaItem::FileDescriptor, content.value("fileDescriptor"));
+    }
+    if (content.contains("size")) {
+        mediaItem->setValue(MediaItem::FileSize, content.value("size"));
+    }
+
     return d->uploadMediaItem(mediaItem, muif, userData);
 }
 

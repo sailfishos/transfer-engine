@@ -29,6 +29,8 @@
 
 // Originally this was meant to be exposed to QML side, but not anymore.
 class MediaItemPrivate;
+class QFile;
+class QIODevice;
 
 class MediaItem: public QObject
 {
@@ -61,18 +63,22 @@ public:
 
         // These come from plugins.
         CancelSupported,
-        RestartSupported
+        RestartSupported,
 
+        FileDescriptor
     };
 
     explicit MediaItem(QObject *parent = 0);
     ~MediaItem();
 
     QVariant value(ValueKey key) const;
+    bool hasValue(ValueKey key) const;
+
+    QIODevice *newIODevice(QObject *parent, const QList<MediaItem::ValueKey> &dataKeys = QList<MediaItem::ValueKey>()) const;
+    QString temporaryFilePath() const;
 
 protected:
     void setValue(ValueKey key, const QVariant &value);
-
 
 private:
     MediaItemPrivate *d_ptr;

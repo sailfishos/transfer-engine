@@ -6,6 +6,7 @@ DEPENDPATH += .
 INCLUDEPATH += . ../src ../lib
 CONFIG += link_pkgconfig
 PKGCONFIG += quillmetadata-qt5
+QT += dbus
 
 # Test files
 HEADERS += \

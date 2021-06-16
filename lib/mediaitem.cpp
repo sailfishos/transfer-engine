@@ -23,7 +23,15 @@
  */
 
 #include "mediaitem.h"
+
 #include <QtDebug>
+#include <QDBusUnixFileDescriptor>
+#include <QFile>
+#include <QDir>
+#include <QTemporaryDir>
+#include <QStandardPaths>
+#include <QCoreApplication>
+#include <QBuffer>
 
 class MediaItemPrivate
 {
@@ -116,4 +124,118 @@ QVariant MediaItem::value(ValueKey key) const
         return QVariant();
     }
     return d->m_values.value(key);
+}
+
+/*!
+    Returns true if a value exists for \a key.
+*/
+bool MediaItem::hasValue(ValueKey key) const
+{
+    Q_D(const MediaItem);
+    return d->m_values.contains(key);
+}
+
+/*!
+    Returns an I/O device to read the data for this media item.
+
+    If any of the \a dataKeys are found in this item, this returns an I/O device to read the data
+    for this key. Supported keys are:
+
+    \list
+    \li FileDescriptor
+    \li ContentData
+    \li Url
+    \endlist
+
+    If \a dataKeys is empty, this searches all of the supported keys.
+
+    If there are multiple key matches (i.e. the media item has multiple data sources) the I/O
+    device will only read the data for the first key that is matched.
+
+    The caller takes ownership of the returned object, which will have its parent set to the
+    specified \a parent.
+*/
+QIODevice *MediaItem::newIODevice(QObject *parent, const QList<MediaItem::ValueKey> &dataKeys) const
+{
+    QList<MediaItem::ValueKey> keysToSearch = dataKeys;
+    if (keysToSearch.isEmpty()) {
+        keysToSearch << FileDescriptor << ContentData << Url;
+    }
+
+    for (const MediaItem::ValueKey &dataKey : keysToSearch) {
+        if (!hasValue(dataKey)) {
+            continue;
+        }
+        switch (int(dataKey)) {
+        case MediaItem::FileDescriptor:
+        {
+            const QVariant value = this->value(MediaItem::FileDescriptor);
+            const int fd = value.type() == QVariant::Int
+                    ? value.toInt()
+                    : value.value<QDBusUnixFileDescriptor>().fileDescriptor();
+            if (fd <= 0) {
+                qWarning() << Q_FUNC_INFO << "unable to read fileDescriptor value:" << value;
+            }
+            QFile *file = new QFile(parent);
+            if (!file->open(fd, QFile::ReadOnly)) {
+                qWarning() << Q_FUNC_INFO << "unable to open fd!" << fd;
+                return nullptr;
+            }
+            return file;
+        }
+        case MediaItem::ContentData:
+        {
+            QBuffer *buffer = new QBuffer(parent);
+            buffer->setData(value(MediaItem::ContentData).toByteArray());
+            if (!buffer->open(QFile::ReadOnly)) {
+                qWarning() << Q_FUNC_INFO << "unable to open content buffer!";
+                return nullptr;
+            }
+            return buffer;
+        }
+        case MediaItem::Url:
+        {
+            const QUrl url = value(MediaItem::Url).toUrl();
+            QFile *file = new QFile(url.isLocalFile() ? url.toLocalFile() : url.toString(), parent);
+            if (!file->open(QFile::ReadOnly)) {
+                qWarning() << Q_FUNC_INFO << "unable to open file!" << file->fileName();
+                return nullptr;
+            }
+            return file;
+        }
+        }
+    }
+
+    return nullptr;
+}
+
+/*!
+    Returns a temporary file path based on the item's resource name.
+
+    The directory path is guaranteed to be unique.
+*/
+QString MediaItem::temporaryFilePath() const
+{
+    static const QDir privilegedDir(
+            QStandardPaths::writableLocation(QStandardPaths::HomeLocation)
+            + QLatin1String("/.local/share/system/privileged/Transfers/"));
+
+    const QString resourceName = value(MediaItem::ResourceName).toString();
+    if (resourceName.isEmpty()) {
+        qWarning() << Q_FUNC_INFO << "failed, no ResourceName set!";
+        return QString();
+    }
+
+    QString filePath;
+    if (privilegedDir.mkpath(".")) {
+        QTemporaryDir tempDir(privilegedDir.absoluteFilePath(QStringLiteral("%1_XXXXXX").arg(qAppName())));
+        tempDir.setAutoRemove(false);
+        if (tempDir.isValid()) {
+            filePath = tempDir.path() + QDir::separator() + resourceName;
+        }
+    }
+    if (filePath.isEmpty()) {
+        qWarning() << Q_FUNC_INFO << "Unable to generate file path:" << filePath;
+    }
+    return filePath;
 }
