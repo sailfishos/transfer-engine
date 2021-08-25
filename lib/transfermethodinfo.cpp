@@ -28,6 +28,7 @@
 namespace {
 
 const QString KeySupportsMultipleFiles = "SupportsMultipleFiles";
+const QString KeySupportsLinks = "SupportsLinks";
 
 }
 
@@ -184,6 +185,8 @@ QVariant TransferMethodInfo::value(int index) const
         return accountIcon;
     case SupportsMultipleFiles:
         return supportsMultipleFiles();
+    case SupportsLinks:
+        return supportsLinks();
     default:
         return QVariant();
     }
@@ -197,6 +200,16 @@ void TransferMethodInfo::setSupportsMultipleFiles(bool supportsMultipleFiles)
 bool TransferMethodInfo::supportsMultipleFiles() const
 {
     return hints.value(KeySupportsMultipleFiles).toBool();
+}
+
+bool TransferMethodInfo::setSupportsLinks(bool supportsLinks)
+{
+    hints.insert(KeySupportsLinks, supportsLinks);
+}
+
+bool TransferMethodInfo::supportsLinks() const
+{
+    return hints.value(KeySupportsLinks).toBool();
 }
 
 QDBusArgument &operator<<(QDBusArgument &argument, const TransferMethodInfoDeprecated &info)

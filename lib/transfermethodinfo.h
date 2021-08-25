@@ -57,7 +57,8 @@ public:
         AccountIcon,     // account icon source url
         ShareUIPath,     // path to the share ui QML plugin
         Capabilities,    // list of supported mimetypes
-        SupportsMultipleFiles
+        SupportsMultipleFiles,
+        SupportsLinks
     };
 
     TransferMethodInfo();
@@ -74,6 +75,9 @@ public:
 
     void setSupportsMultipleFiles(bool supportsMultipleFiles);
     bool supportsMultipleFiles() const;
+
+    bool setSupportsLinks(bool supportsLinks);
+    bool supportsLinks() const;
 
     QString displayName;
     QString userName;
