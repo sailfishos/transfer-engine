@@ -35,7 +35,15 @@ import Sailfish.TransferEngine 1.0
 SilicaFlickable {
     id: root
 
-    property var sailfishTransfer
+    property var shareAction
+
+    Component.onCompleted: {
+        sailfishTransfer.loadConfiguration(shareAction.toConfiguration())
+    }
+
+    SailfishTransfer {
+        id: sailfishTransfer
+    }
 
     width: Screen.width
     height: Math.min(Screen.height, contentHeight)
@@ -51,7 +59,7 @@ SilicaFlickable {
         Thumbnail {
             width: Screen.width
             height: Screen.height / 2
-            source: root.sailfishTransfer.source
+            source: sailfishTransfer.source
             sourceSize.width: Screen.width
             sourceSize.height: Screen.height / 2
         }
@@ -73,7 +81,7 @@ SilicaFlickable {
                 sailfishTransfer.metadataStripped = true
                 sailfishTransfer.userData = {
                     "description": "Random Text which can be what ever",
-                    "accountId": root.sailfishTransfer.transferMethodInfo.accountId,
+                    "accountId": sailfishTransfer.transferMethodInfo.accountId,
                     "scalePercent": 0.5
                 }
                 sailfishTransfer.start()
