@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2021 Open Mobile Platform LLC.
  *
  * All rights reserved.
  *
@@ -116,8 +117,11 @@ public:
     in a case of canceling or restarting the operation. In order to do that client must provide
     CallbackInterface object with properly set dbus information. See the example below.
 
-    For share plugin implementation:
-    \sa TransferPluginInterface, MediaTransferInterface, TransferPluginInfo
+    For sharing plugin implementation:
+    \sa SharingPluginInterface, SharingPluginInfo
+
+    For upload plugin implementation:
+    \sa TransferPluginInterface, MediaTransferInterface
 
     To use this API to create e.g. Sync entry see the example below:
 
@@ -288,7 +292,7 @@ int TransferEngineClient::createSyncEvent(const QString &displayName,
 
 /*!
     Start the transfer for the existing transfer entry with \a transferId. This changes the status of the
-    transfer from idle to started.These status changes are handled by Nemo TransferEngine internally, but
+    transfer from idle to started. These status changes are handled by Nemo TransferEngine internally, but
     after this method has been called, the transfer is possible to cancel, interrupt or finish.
  */
 void TransferEngineClient::startTransfer(int transferId)

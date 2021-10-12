@@ -1,7 +1,7 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
-** Contact: Marko Mattila <marko.mattila@jollamobile.com>
+** Copyright (C) 2013 - 2017 Jolla Ltd.
+** Copyright (c) 2021 Open Mobile Platform LLC.
 ** All rights reserved.
 **
 ** This file is part of Nemo Transfer Engine package.
@@ -39,21 +39,21 @@
 \title Nemo Transfer Engine
 
 The Nemo Transfer Engine is a daemon process which takes care of tracking sharing, sync and downloads.
-In addition to just tracking those operations, it provides an API to create new share plugins and different
-functionality related these operations.The Nemo Transfer Engine doesn't provide any UI components, but the
-plugin interface expects sharing UIs to be written as QML.
+In addition to just tracking those operations, it provides an API to create new transfer and share plugins
+and different functionality related these operations. The Nemo Transfer Engine doesn't provide any UI
+components, but the plugin interface expects sharing UIs to be written as QML.
 
 The Nemo Transfer Engine can be understood as a front end to the database which contain all the information
 about sharing, syncs and downloads. For syncs and downloads it acts only as storage manager so clients can
 use Nemo Transfer Engine client API to create and update sync and download events. For sharing, Nemo Transfer
-Engine provides own API and supports share plugins.
+Engine provides own API and supports transfer plugins when sharing needs them.
 
 See TransferEngine DbManager
 
 
 \section2 Nemo Transfer Engine API
 
-The API can be divided in two different parts: the share plugin API and the client API.
+The API can be divided in three different parts: the sharing plugin API, the transfer plugin API and the client API.
 
 \section3 Share Plugin API
 
@@ -63,18 +63,31 @@ share functionality implementation depends on the client e.g. if it's HW specifi
 such as Facebook. Each plugin must implement or use the following interface:
 
 \list
+    \li \l {SharingPluginInterface} Share plugin must implement this interface
+    \li \l {SharingPluginInfo} Share plugin must provide information about plugin using this class
+    \li \l {SharingMethodInfo} Share plugin must provide information about e.g. accounts using this class
+\endlist
+
+A sharing plugin may optionally need an accompanying transfer plugin.
+
+\section3 Transfer Plugin API
+
+Transfer plugin is a Qt plugin, which must be implemented using C++ interfaces defined by Nemo Transfer Engine.
+The plugins must be installed to the specific location where Nemo Transfer Engine loads them. The actual
+transfer functionality implementation depends on the client e.g. if it's HW specific like NFC or online service
+such as Facebook. Each plugin must implement or use the following interface:
+
+\list
     \li \l {TransferPluginInterface} Share plugin must implement this interface
     \li \l {MediaTransferInterface} Share plugin must implement this interface
-    \li \l {TransferPluginInfo} Share plugin must provide information about plugin using this class
-    \li \l {TransferMethodInfo} Share plugin must provide information about e.g. accounts using this class
 \endlist
 
 \section3 Client API
 
 Client API can also be divided in two sections: full features DBus API and TransferEngineClient Interface.
 The first one supports all the features Nemo Transfer Engine provides and makes possible to implement for
-example Transfer UI and client side sharing interface on top of it. The TransferEngineClient is meant to
-be used by clients who want to inform Nemo Transfer Engine of ongoing Sync or Downloads.
+example Transfer UI interface on top of it. The TransferEngineClient is meant to be used by clients
+who want to inform Nemo Transfer Engine of ongoing Sync or Downloads.
 
 \list
     \li DBus API - see org.nemomobile.transferengine.xml. For the client side it will generate TransferEngineInterface

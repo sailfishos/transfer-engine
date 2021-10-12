@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Open Mobile Platform LLC.
+ * Copyright (c) 2019 - 2021 Open Mobile Platform LLC.
  *
  * All rights reserved.
  *
@@ -22,19 +22,4 @@
  * Lesser General Public License for more details.
  */
 
-#include "transferplugininfo.h"
-
-QVariantMap TransferPluginInfo::metaData() const
-{
-    return property("_nemo_transferplugininfo_capabilities").toMap();
-}
-
-void TransferPluginInfo::setMetaData(const QVariantMap &metaData)
-{
-    setProperty("_nemo_transferplugininfo_capabilities", metaData);
-}
-
-void TransferPluginInfo::registerType()
-{
-    qDBusRegisterMetaType<QList<QVariantMap> >();
-}
+#include "sharingplugininfo.h"

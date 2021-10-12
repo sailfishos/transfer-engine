@@ -31,3 +31,8 @@ Building RPMs using 'mb' script in Mer Platform SDK:
 # mb build -t <your target name> rpm/transfer-engine.spec
 
 
+Changes in 2.0
+--------------
+Sharing plugins have been separated from transfer plugins and they have different base classes and
+they are stored separately. Transfer Engine loads only transfer plugins. API for all plugins has
+been changed and old plugins no longer load. All plugins must be adjusted for this new architecture.

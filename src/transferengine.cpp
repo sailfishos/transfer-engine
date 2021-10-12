@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013 - 2019 Jolla Ltd.
- * Copyright (c) 2019 Open Mobile Platform LLC.
+ * Copyright (c) 2019 - 2021 Open Mobile Platform LLC.
  *
  * All rights reserved.
  *
@@ -31,7 +31,6 @@
 #include "logging.h"
 #include "transferengine_adaptor.h"
 #include "transfertypes.h"
-#include "transferplugininfo.h"
 
 #include <QDir>
 #include <QtDebug>
@@ -45,10 +44,7 @@
 
 #include <signal.h>
 
-#include <Accounts/Manager>
-
 #define CONFIG_PATH "/usr/share/nemo-transferengine/nemo-transfer-engine.conf"
-#define FILE_WATCHER_TIMEOUT 5000
 #define ACTIVITY_MONITOR_TIMEOUT 1*60*1000 // 1 minute in ms
 #define TRANSFER_EXPIRATION_THRESHOLD 3*60 // 3 minutes in seconds
 
@@ -152,24 +148,11 @@ TransferEnginePrivate::TransferEnginePrivate(TransferEngine *parent):
     m_notificationsEnabled(true),
     q_ptr(parent)
 {
-    m_fileWatcherTimer = new QTimer(this);
-    m_fileWatcherTimer->setSingleShot(true);
-    connect(m_fileWatcherTimer, SIGNAL(timeout()), this, SLOT(enabledPluginsCheck()));
-
     m_delayedExitTimer = new QTimer(this);
     m_delayedExitTimer->setSingleShot(true);
     m_delayedExitTimer->setInterval(60000);
     m_delayedExitTimer->start(); // Exit if nothing happens within 60 sec
     connect(m_delayedExitTimer, SIGNAL(timeout()), this, SLOT(delayedExitSafely()));
-
-    m_fileWatcher = new QFileSystemWatcher(this);
-    m_fileWatcher->addPath(SHARE_PLUGINS_PATH);
-    connect(m_fileWatcher, SIGNAL(directoryChanged(QString)), this, SLOT(pluginDirChanged()));
-
-    m_accountManager = new Accounts::Manager("sharing", this);
-    connect(m_accountManager, SIGNAL(accountCreated(Accounts::AccountId)), this, SLOT(enabledPluginsCheck()));
-    connect(m_accountManager, SIGNAL(accountRemoved(Accounts::AccountId)), this, SLOT(enabledPluginsCheck()));
-    connect(m_accountManager, SIGNAL(accountUpdated(Accounts::AccountId)), this, SLOT(enabledPluginsCheck()));
 
     // Exit safely stuff if we receive certain signal or there are no active transfers
     Q_Q(TransferEngine);
@@ -201,14 +184,6 @@ TransferEnginePrivate::TransferEnginePrivate(TransferEngine *parent):
     }
 }
 
-void TransferEnginePrivate::pluginDirChanged()
-{
-    // We need to check our plugins, but only after a short period of time
-    // because some operations may cause calling this slot over 10 times.
-    // E.g. reinstallation of plugins from the RPM package
-    m_fileWatcherTimer->start(FILE_WATCHER_TIMEOUT);
-}
-
 void TransferEnginePrivate::exitSafely()
 {
     if (!m_activityMonitor->activeTransfers()) {
@@ -226,69 +201,6 @@ void TransferEnginePrivate::delayedExitSafely()
     } else {
         qCDebug(lcTransferLog) << "Stopping transfer engine";
         qApp->exit();
-    }
-}
-
-void TransferEnginePrivate::enabledPluginsCheck()
-{
-    Q_Q(TransferEngine);
-    if (m_fileWatcherTimer->isActive()) {
-        m_fileWatcherTimer->stop();
-    }
-
-    if (m_infoObjects.count() > 0) {
-        qCWarning(lcTransferLog) << Q_FUNC_INFO << "Already quering account info" << m_infoObjects.count();
-        return;
-    }
-
-    // First clear old data
-    m_enabledPlugins.clear();
-    m_pluginMetaData.clear();
-    qDeleteAll(m_infoObjects);
-    m_infoObjects.clear();
-
-    QPluginLoader loader;
-    loader.setLoadHints(QLibrary::ResolveAllSymbolsHint | QLibrary::ExportExternalSymbolsHint);
-
-    // Handle the case if all the plugins have been removed.
-    QStringList plugins = pluginList();
-    if (plugins.isEmpty()) {
-        emit q->transferMethodListChanged();
-        return;
-    }
-
-    // We have plugins
-    Q_FOREACH(QString plugin, plugins) {
-        loader.setFileName(plugin);
-        TransferPluginInterface *interface =
-                qobject_cast<TransferPluginInterface*>(loader.instance());
-
-        if (interface && interface->enabled()) {
-
-            TransferPluginInfo *info = interface->infoObject();
-            if (!info) {
-                qCWarning(lcTransferLog) << Q_FUNC_INFO << "NULL Info object!";
-                continue;
-            }
-
-            if (info->ready()) {
-                if (info->info().count() > 0) {
-                    m_enabledPlugins << info->info();
-                }
-                m_pluginMetaData << info->metaData();
-                delete info;
-            } else {
-                // These object will be cleaned in pluginInfoReady() slot.
-                m_infoObjects << info;
-                connect(info, SIGNAL(infoReady()), this, SLOT(pluginInfoReady()));
-                connect(info, SIGNAL(infoError(QString)), this, SLOT(pluginInfoError(QString)));
-                info->query();
-            }
-        }
-
-        if (!interface) {
-            qCWarning(lcTransferLog) << Q_FUNC_INFO << loader.errorString();
-        }
     }
 }
 
@@ -580,7 +492,7 @@ int TransferEnginePrivate::uploadMediaItem(MediaItem *mediaItem,
 
 QStringList TransferEnginePrivate::pluginList() const
 {
-    QDir dir(SHARE_PLUGINS_PATH);
+    QDir dir(TRANSFER_PLUGINS_PATH);
     QStringList plugins = dir.entryList(QStringList() << "*.so",
                                         QDir::Files,
                                         QDir::NoSort);
@@ -592,27 +504,16 @@ QStringList TransferEnginePrivate::pluginList() const
     return filePaths;
 }
 
-QList <TransferMethodInfo> TransferEnginePrivate::enabledPlugins() const
-{
-    return m_enabledPlugins;
-}
-
-QList<QVariantMap> TransferEnginePrivate::pluginMetaData() const
-{
-    return m_pluginMetaData;
-}
-
 MediaTransferInterface *TransferEnginePrivate::loadPlugin(const QString &pluginId) const
 {
     QPluginLoader loader;
     loader.setLoadHints(QLibrary::ResolveAllSymbolsHint | QLibrary::ExportExternalSymbolsHint);
-    Q_FOREACH(QString plugin, pluginList()) {
+    for (QString plugin : pluginList()) {
         loader.setFileName(plugin);
-        TransferPluginInterface *interface =
-                qobject_cast<TransferPluginInterface*>(loader.instance());
+        TransferPluginInterface *interface = qobject_cast<TransferPluginInterface*>(loader.instance());
 
 
-        if (interface && interface->enabled() && interface->pluginId() == pluginId) {
+        if (interface && interface->pluginId() == pluginId) {
             return interface->transferObject();
         }
 
@@ -704,43 +605,6 @@ void TransferEnginePrivate::updateProgress(qreal progress)
     q->updateTransferProgress(key, progress);
 }
 
-void TransferEnginePrivate::pluginInfoReady()
-{
-    TransferPluginInfo *infoObj = qobject_cast<TransferPluginInfo*>(sender());
-
-    QList<TransferMethodInfo> infoList = infoObj->info();
-    if (!infoList.isEmpty()) {
-        m_enabledPlugins << infoList;
-    }
-    m_pluginMetaData << infoObj->metaData();
-
-    if (m_infoObjects.removeOne(infoObj)) {
-        delete infoObj;
-    } else {
-        qCWarning(lcTransferLog) << Q_FUNC_INFO << "Failed to remove info object!";
-        delete infoObj;
-    }
-
-    if (m_infoObjects.isEmpty()) {
-        Q_Q(TransferEngine);
-        emit q->transferMethodListChanged();
-    }
-}
-
-void TransferEnginePrivate::pluginInfoError(const QString &msg)
-{
-    qCWarning(lcTransferLog) << "TransferEnginePrivate::pluginInfoError:" << msg;
-    TransferPluginInfo *infoObj = qobject_cast<TransferPluginInfo*>(sender());
-    m_infoObjects.removeOne(infoObj);
-    infoObj->deleteLater();
-
-    if (m_infoObjects.isEmpty()) {
-        Q_Q(TransferEngine);
-        emit q->transferMethodListChanged();
-    }
-}
-
-
 TransferEngineData::TransferType TransferEnginePrivate::transferType(int transferId)
 {
     if (!m_keyTypeCache.contains(transferId)) {
@@ -795,22 +659,15 @@ void TransferEnginePrivate::callbackCall(int transferId, CallbackMethodType meth
 
     TransferEngine is the central place for:
     \list
-        \li Sharing - Provides requires plugin interfaces for share plugins
         \li Downloads - Provides an API to create Download entries
         \li Syncs - Provides an API to create Sync entries
     \endlist
 
     For Downloads and Syncs, the Transfer Engine acts only a place to keep track of these operations.
-    The actual Download and Sync is executed by a client using TransferEngine API. For sharing
-    the TransferEngine provides an API containing a few interaces, which a share plugin must implement.
-    TransferEngine also takes care of loading and executing the sharing, based on the API it defines.
+    The actual Download and Sync is executed by a client using TransferEngine API.
 
-    The most essential thing to remember is that Transfer Engine provides share plugin API, DBus API e.g.
-    for creating Transfer UI or Share UIs, it stores data to the local sqlite database using DbManager
-    and that's it.
-
-    How to implement a share plugin see: TransferPluginInterface, MediaTransferInterface, MediaItem,
-    TransferPluginInfo
+    The most essential thing to remember is that Transfer Engine provides transfer plugin API, DBus API e.g.
+    for creating Transfer UI, it stores data to the local sqlite database using DbManager and that's it.
 
     TransferEngine provides DBus API, but instead of using it directly, it's recommended to use
     TransferEngineClient. If there is a need to create UI to display e.g. transfer statuses, then
@@ -831,13 +688,6 @@ void TransferEnginePrivate::callbackCall(int transferId, CallbackMethodType meth
 */
 
 /*!
-    \fn void TransferEngine::transferMethodListChanged()
-
-    The signal is emitted when transfer methods have changed. Usually tranfer methods change
-    when a new plugin is installed to the system or an account has been enabled or disabled.
-*/
-
-/*!
     \fn void TransferEngine::transfersChanged()
 
     The signal is emitted when there is a new transfer or a transfer has been removed from the
@@ -851,10 +701,7 @@ TransferEngine::TransferEngine(QObject *parent) :
     QObject(parent),
     d_ptr(new TransferEnginePrivate(this))
 {
-    TransferMethodInfoDeprecated::registerType();
-    TransferMethodInfo::registerType();
     TransferDBRecord::registerType();
-    TransferPluginInfo::registerType();
 
     new TransferEngineAdaptor(this);
 
@@ -872,7 +719,6 @@ TransferEngine::TransferEngine(QObject *parent) :
     DbManager::instance();
     Q_D(TransferEngine);
     d->recoveryCheck();
-    d->enabledPluginsCheck();    
 }
 
 /*!
@@ -897,10 +743,10 @@ TransferEngine::~TransferEngine()
 /*!
     DBus adaptor calls this method to start uploading a media item. The minimum information
     needed to start an upload and to create an entry to the transfer database is:
-    \a source the path to the media item to be downloaded. \a serviceId the ID of the share
+    \a source the path to the media item to be downloaded. \a serviceId the ID of the transfer
     plugin. See TransferPluginInterface::pluginId() for more details. \a mimeType is the MimeType
     of the media item e.g. "image/jpeg". \a metadataStripped boolean to indicate if the metadata
-    should be kept or removed before uploading. \a userData is various kind of data which share UI
+    should be kept or removed before uploading. \a userData is various kind of data which transfer UI
     may provide to the engine. UserData is QVariant map i.e. the data must be provided as key-value
     pairs, where the keys must be QStrings.
 
@@ -908,13 +754,13 @@ TransferEngine::~TransferEngine()
     \list
         \li "title" Title for the media
         \li "description" Description for the media
-        \li "accountId" The ID of the account which is used for sharing. See qt-accounts for more details.
+        \li "accountId" The ID of the account which is used for uploading. See qt-accounts for more details.
         \li "scalePercent" The scale percent e.g. downscale image to 50% from original before uploading.
     \endlist
 
-    In practice this method instantiates a share plugin with \a serviceId and passes a MediaItem instance filled
+    In practice this method instantiates a transfer plugin with \a serviceId and passes a MediaItem instance filled
     with required data to it. When the plugin has been loaded, the MediaTransferInterface::start() method is called
-    and the actual sharing starts.
+    and the actual uploading starts.
 
     This method returns a transfer ID which can be used later to fetch information of this specific transfer.
  */
@@ -952,13 +798,13 @@ int TransferEngine::uploadMediaItem(const QString &source,
 
 /*!
     DBus adaptor calls this method to start uploading media item content. Sometimes the content
-    to be shared is not a file, but data e.g. contact information in vcard format. In order to
+    to be transferred is not a file, but data e.g. contact information in vcard format. In order to
     avoid serializing data to a file, pass url to the file, reading the data, deleting the file,
     TransferEngine provides this convenience API.
 
-    \a content is the media item content to be shared. \a serviceId is the id of the share plugin. See
-    TransferPluginInterface::pluginId() for more details. \a userData is a QVariantMap containing
-    share plugin specific data. See TransferEngine::uploadMediaItem for more details.
+    \a content is the media item content to be transferred. \a serviceId is the id of the transfer
+    plugin. See TransferPluginInterface::pluginId() for more details. \a userData is a QVariantMap
+    containing transfer plugin specific data. See TransferEngine::uploadMediaItem for more details.
 
     This method returns a transfer ID which can be used later to fetch information of this specific transfer.
 */
@@ -1134,7 +980,8 @@ void TransferEngine::startTransfer(int transferId)
 /*!
     DBus adaptor calls this method to restart a canceled or failed transfer with a \a transferId. In
     a case of Upload, this method creates MediaItem instance of the existing transfer and instantiates
-    the required share plugin. The MediaItem instance is passed to the plugin and sharing is restarted.
+    the required transfer plugin. The MediaItem instance is passed to the plugin and uploading is
+    restarted.
 
     For Sync and Download entries, this method calls their callbacks methods, if a callback interface
     has been defined by the client originally created the Sync or Download entry.
@@ -1317,50 +1164,6 @@ QList<TransferDBRecord> TransferEngine::activeTransfers()
     Q_D(TransferEngine);
     d->exitSafely();
     return DbManager::instance()->activeTransfers();
-}
-
-/*!
-    DBus adaptor calls this method to fetch a list of transfer methods. This method returns QList<TransferMethodInfo>.
-
-    Transfer methods are basically a list of share plugins installed to the system.
- */
-QList <TransferMethodInfoDeprecated> TransferEngine::transferMethods()
-{
-    Q_D(TransferEngine);
-    d->exitSafely();
-
-    QList <TransferMethodInfo> newPlugins = d->enabledPlugins();
-    QList <TransferMethodInfoDeprecated> oldPlugins;
-    for (auto info : newPlugins) {
-        TransferMethodInfoDeprecated oldInfo;
-        oldInfo.displayName     = info.displayName;
-        oldInfo.userName        = info.userName;
-        oldInfo.methodId        = info.methodId;
-        oldInfo.shareUIPath     = info.shareUIPath;
-        oldInfo.capabilitities  = info.capabilitities;
-        oldInfo.accountId       = info.accountId;
-        oldPlugins << oldInfo;
-    }
-    return oldPlugins;
-}
-
-QList <TransferMethodInfo> TransferEngine::transferMethods2()
-{
-    Q_D(TransferEngine);
-    d->exitSafely();
-    return d->enabledPlugins();
-}
-
-/*!
-    DBus adaptor calls this method to fetch a list of the share plugin metadata.
-
-    This method returns QList<QVariantMap>.
- */
-QList<QVariantMap> TransferEngine::pluginMetaData()
-{
-    Q_D(TransferEngine);
-    d->exitSafely();
-    return d->pluginMetaData();
 }
 
 /*!

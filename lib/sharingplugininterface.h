@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2013 - 2019 Jolla Ltd.
- * Copyright (c) 2019 Open Mobile Platform LLC.
+ * Copyright (c) 2021 Open Mobile Platform LLC.
  *
  * All rights reserved.
  *
@@ -23,30 +22,19 @@
  * Lesser General Public License for more details.
  */
 
-#ifndef TRANSFERPLUGININFO_H
-#define TRANSFERPLUGININFO_H
-#include <QObject>
-#include <QVariantMap>
-#include "transfermethodinfo.h"
+#ifndef SHARINGPLUGININTERFACE_H
+#define SHARINGPLUGININTERFACE_H
 
-class TransferPluginInfo: public QObject
+#include <QtPlugin>
+#include "sharingplugininfo.h"
+
+class SharingPluginInterface
 {
-    Q_OBJECT
 public:
-    virtual QList<TransferMethodInfo> info() const = 0;
-    virtual void query() = 0;
-    virtual bool ready() const = 0;
+    virtual SharingPluginInfo *infoObject() = 0;
 
-    QVariantMap metaData() const;
-
-    static void registerType();
-
-protected:
-    void setMetaData(const QVariantMap &metaData);
-
-Q_SIGNALS:
-    void infoReady();
-    void infoError(const QString &msg);
+    virtual QString pluginId() const = 0;
 };
 
-#endif // TRANSFERPLUGINSTATUS_H
+Q_DECLARE_INTERFACE(SharingPluginInterface, "org.sailfishos.SharingPluginInterface/1.0")
+#endif // SHARINGPLUGININTERFACE_H

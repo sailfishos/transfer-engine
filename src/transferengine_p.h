@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2019 - 2021 Open Mobile Platform LLC.
  *
  * All rights reserved.
  *
@@ -30,17 +31,11 @@
 #include <QVariantList>
 
 #include "mediatransferinterface.h"
-#include "transfermethodinfo.h"
-
-namespace Accounts {
-class Manager;
-}
 
 class QFileSystemWatcher;
 class QTimer;
 class QUrl;
 class TransferEngine;
-class TransferPluginInfo;
 
 class TransferEngineSignalHandler: public QObject
 {
@@ -118,18 +113,12 @@ public:
 public Q_SLOTS:
     void exitSafely();
     void delayedExitSafely();
-    void enabledPluginsCheck();
     void cleanupExpiredTransfers(const QList<int> &expiredIds);
-    void pluginDirChanged();
     void uploadItemStatusChanged(MediaTransferInterface::TransferStatus status);
     void updateProgress(qreal progress);
-    void pluginInfoReady();
-    void pluginInfoError(const QString &msg);
 
 public:
     QStringList pluginList() const;
-    QList <TransferMethodInfo> enabledPlugins() const;
-    QList<QVariantMap> pluginMetaData() const;
     MediaTransferInterface *loadPlugin(const QString &pluginId) const;
     QString mediaFileOrResourceName(MediaItem *mediaItem) const;
 
@@ -137,12 +126,6 @@ private:
     QMap <MediaTransferInterface*, int> m_plugins;
     QMap <int, TransferEngineData::TransferType> m_keyTypeCache;
     bool m_notificationsEnabled;
-    QList <TransferPluginInfo*> m_infoObjects;
-    QList <TransferMethodInfo> m_enabledPlugins;
-    QList<QVariantMap> m_pluginMetaData;
-    Accounts::Manager *m_accountManager;
-    QFileSystemWatcher *m_fileWatcher;
-    QTimer *m_fileWatcherTimer;
     QTimer *m_delayedExitTimer;
     ClientActivityMonitor *m_activityMonitor;
     TransferEngine *q_ptr;

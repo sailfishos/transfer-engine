@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2021 Open Mobile Platform LLC.
  *
  * All rights reserved.
  *
@@ -23,10 +24,10 @@
  */
 
 #include <QCoreApplication>
+#include <QTranslator>
 #include <QtDBus/QDBusConnection>
 #include <QtDebug>
 #include "transferengine.h"
-
 
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {

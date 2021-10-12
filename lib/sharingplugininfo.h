@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2021 Open Mobile Platform LLC.
  *
  * All rights reserved.
  *
@@ -22,20 +23,21 @@
  * Lesser General Public License for more details.
  */
 
-#include <QTest>
-#include "ut_imageoperation.h"
-#include "ut_mediatransferinterface.h"
+#ifndef SHARINGPLUGININFO_H
+#define SHARINGPLUGININFO_H
+#include <QObject>
+#include "sharingmethodinfo.h"
 
-int main(int argc, char *argv[])
+class SharingPluginInfo: public QObject
 {
-    Q_UNUSED(argc)
-    Q_UNUSED(argv)
+    Q_OBJECT
+public:
+    virtual QList<SharingMethodInfo> info() const = 0;
+    virtual void query() = 0;
 
-    ut_imageoperation t1;
-    int res = QTest::qExec(&t1);
+Q_SIGNALS:
+    void infoReady();
+    void infoError(const QString &msg);
+};
 
-    ut_mediatransferinterface t2;
-    res += QTest::qExec(&t2);
-
-    return res;
-}
+#endif // SHARINGPLUGININFO_H

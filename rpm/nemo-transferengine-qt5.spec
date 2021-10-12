@@ -33,7 +33,8 @@ Obsoletes: nemo-transferengine <= 0.0.19
 %files
 %defattr(-,root,root,-)
 %{_userunitdir}/transferengine.service
-%dir %{_datadir}/nemo-transferengine
+%{_libdir}/nemo-transferengine
+%{_datadir}/nemo-transferengine
 %{_bindir}/nemo-transfer-engine
 %{_datadir}/dbus-1/services/org.nemo.transferengine.service
 %{_datadir}/translations/*.qm
@@ -111,7 +112,9 @@ make docs
 
 %install
 rm -rf %{buildroot}
-mkdir -p %{buildroot}/%{_datadir}/nemo-transferengine
+mkdir -p %{buildroot}/%{_datadir}/nemo-transferengine/plugins/sharing
+mkdir -p %{buildroot}/%{_libdir}/nemo-transferengine/plugins/sharing
+mkdir -p %{buildroot}/%{_libdir}/nemo-transferengine/plugins/transfer
 %qmake5_install
 
 mkdir -p %{buildroot}/%{_docdir}/%{name}

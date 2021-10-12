@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2021 Open Mobile Platform LLC.
  *
  * All rights reserved.
  *
@@ -22,20 +22,32 @@
  * Lesser General Public License for more details.
  */
 
-#include <QTest>
-#include "ut_imageoperation.h"
-#include "ut_mediatransferinterface.h"
+#ifndef TRANSFERPLUGINLOADER_H
+#define TRANSFERPLUGINLOADER_H
 
-int main(int argc, char *argv[])
+#include <QObject>
+
+#include "sharingmethodinfo.h"
+
+class SharingPluginLoaderPrivate;
+class SharingPluginLoader : public QObject
 {
-    Q_UNUSED(argc)
-    Q_UNUSED(argv)
+    Q_OBJECT
 
-    ut_imageoperation t1;
-    int res = QTest::qExec(&t1);
+public:
+    explicit SharingPluginLoader(QObject *parent = nullptr);
+    ~SharingPluginLoader();
+    const QList<SharingMethodInfo> &plugins() const;
+    void reload();
+    bool loaded() const;
 
-    ut_mediatransferinterface t2;
-    res += QTest::qExec(&t2);
+signals:
+    void pluginsChanged();
+    void pluginsLoaded();
 
-    return res;
-}
+private:
+    SharingPluginLoaderPrivate *d_ptr;
+    Q_DECLARE_PRIVATE(SharingPluginLoader)
+};
+
+#endif // TRANSFERPLUGINLOADER_H

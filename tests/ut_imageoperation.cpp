@@ -169,7 +169,7 @@ void ut_imageoperation::testScaleToSize()
     QCOMPARE(ImageOperation::scaleImageToSize("", targetSize, target), QString());
 
     // Valid source file, invalid targetSize -> fail
-    QCOMPARE(ImageOperation::scaleImageToSize(filePath, -1.0, target), QString());
+    QCOMPARE(ImageOperation::scaleImageToSize(filePath, -1, target), QString());
     QCOMPARE(ImageOperation::scaleImageToSize(filePath, 0, target), QString());
     QCOMPARE(ImageOperation::scaleImageToSize(filePath, targetSize*40, target), QString());
 
