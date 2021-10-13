@@ -22,7 +22,7 @@ BuildRequires: qt5-qttools-qthelp-devel
 BuildRequires: qt5-plugin-platform-minimal
 BuildRequires: qt5-plugin-sqldriver-sqlite
 BuildRequires: pkgconfig(qt5-boostable)
-BuildRequires: systemd
+BuildRequires: pkgconfig(systemd)
 Requires: libnemotransferengine-qt5 = %{version}
 Provides: nemo-transferengine > 0.0.19
 Obsoletes: nemo-transferengine <= 0.0.19
