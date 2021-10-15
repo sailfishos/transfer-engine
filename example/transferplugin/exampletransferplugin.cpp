@@ -1,6 +1,6 @@
 /******************************************************************************
-Copyright (c) <2014>, Jolla Ltd.
-Contact: Marko Mattila <marko.mattila@jolla.com>
+Copyright (c) 2014 Jolla Ltd.
+Copyright (c) 2021 Open Mobile Platform LLC.
 
 All rights reserved.
 
@@ -27,25 +27,24 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
-#ifndef EXAMPLESHAREPLUGIN_H
-#define EXAMPLESHAREPLUGIN_H
-#include "transferplugininterface.h"
-#include <QObject>
+#include "exampletransferplugin.h"
+#include "exampleuploader.h"
+#include <QtPlugin>
 
-class Q_DECL_EXPORT ExampleSharePlugin : public QObject, public TransferPluginInterface
+ExampleSharePlugin::ExampleSharePlugin()
 {
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "com.myapp.transfer.plugin.example")
-    Q_INTERFACES(TransferPluginInterface)
-public:
-    ExampleSharePlugin();
-    ~ExampleSharePlugin();
+}
 
-    MediaTransferInterface * transferObject();
-    TransferPluginInfo *infoObject();
-    QString pluginId() const;
-    bool enabled() const ;
+ExampleSharePlugin::~ExampleSharePlugin()
+{
+}
 
-};
+MediaTransferInterface * ExampleSharePlugin::transferObject()
+{
+    return new ExampleUploader;
+}
 
-#endif // EXAMPLESHAREPLUGIN_H
+QString ExampleSharePlugin::pluginId() const
+{
+    return "Example-Share-Method-ID";
+}

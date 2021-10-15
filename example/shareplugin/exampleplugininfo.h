@@ -1,6 +1,6 @@
 /******************************************************************************
-Copyright (c) <2014>, Jolla Ltd.
-Contact: Marko Mattila <marko.mattila@jolla.com>
+Copyright (c) 2014 Jolla Ltd.
+Copyright (c) 2021 Open Mobile Platform LLC.
 
 All rights reserved.
 
@@ -29,21 +29,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef EXAMPLEPLUGININFO_H
 #define EXAMPLEPLUGININFO_H
 
-#include "transferplugininfo.h"
+#include "sharingplugininfo.h"
 
-class ExamplePluginInfo : public TransferPluginInfo
+class ExamplePluginInfo : public SharingPluginInfo
 {
     Q_OBJECT
 public:
     ExamplePluginInfo();
     ~ExamplePluginInfo();
 
-    QList<TransferMethodInfo> info() const;
+    QList<SharingMethodInfo> info() const;
     void query();
-    bool ready() const;
 private:
-    QList<TransferMethodInfo> m_infoList;
-    bool m_ready;
+    QList<SharingMethodInfo> m_infoList;
 };
 
 #endif // EXAMPLEPLUGININFO_H

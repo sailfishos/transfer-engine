@@ -1,10 +1,10 @@
 Name: example-share-plugin
 Version: 0.0.1
 Release: 0
-Summary: Share plugins for nemo transfer engine
+Summary: Example plugins for nemo transfer engine
 Group: System/Libraries
 License: LICENCE
-URL: https://github.com/nemomobile/transfer-engine
+URL: https://github.com/sailfishos/transfer-engine
 Source0: %{name}-%{version}.tar.gz
 BuildRequires: pkgconfig(Qt5Core)
 BuildRequires: pkgconfig(Qt5Qml)
@@ -20,9 +20,11 @@ Requires:  declarative-transferengine-qt5 >= 0.0.44
 
 %files
 %defattr(-,root,root,-)
-%{_libdir}/nemo-transferengine/plugins/*shareplugin.so
-%{_datadir}/nemo-transferengine/plugins/*.qml
-%{_datadir}/translations/nemotransferengine/*.qm
+%{_libdir}/nemo-transferengine/plugins/transfer/*transferplugin.so
+%{_libdir}/nemo-transferengine/plugins/sharing/*shareplugin.so
+%{_libdir}/qt5/qml/Sailfish/TransferEngine/Example
+%{_datadir}/nemo-transferengine/plugins/sharing/*.qml
+%{_datadir}/translations/*.qm
 
 %package ts-devel
 Summary:   Translation source for Transfer Engine share plugins
@@ -43,7 +45,7 @@ Translation source for Transfer Engine share plugins
 
 %qmake5
 
-make %{?jobs:-j%jobs}
+%make_build
 
 %install
 rm -rf %{buildroot}

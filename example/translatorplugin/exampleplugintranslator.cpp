@@ -1,6 +1,5 @@
 /******************************************************************************
-Copyright (c) <2014>, Jolla Ltd.
-Contact: Marko Mattila <marko.mattila@jolla.com>
+Copyright (c) 2021 Open Mobile Platform LLC.
 
 All rights reserved.
 
@@ -27,36 +26,24 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
-#include "exampleshareplugin.h"
-#include "exampleuploader.h"
-#include "exampleplugininfo.h"
-#include <QtPlugin>
+#include "exampleplugintranslator.h"
 
-ExampleSharePlugin::ExampleSharePlugin()
+#include <QCoreApplication>
+#include <QLocale>
+#include <QTranslator>
+
+void ExamplePluginTranslator::load()
 {
-}
+    static QTranslator *ee = nullptr;
+    static QTranslator *translator = nullptr;
 
-ExampleSharePlugin::~ExampleSharePlugin()
-{
-}
+    if (ee)
+        return;
 
-MediaTransferInterface * ExampleSharePlugin::transferObject()
-{
-    return new ExampleUploader;
+    ee = new QTranslator(qApp);
+    ee->load("example_share_plugin_eng_en", "/usr/share/translations");
+    qApp->installTranslator(ee);
+    translator = new QTranslator(qApp);
+    translator->load(QLocale(), "example_share_plugin", "-", "/usr/share/translations");
+    qApp->installTranslator(translator);
 }
-
-TransferPluginInfo *ExampleSharePlugin::infoObject()
-{
-    return new ExamplePluginInfo;
-}
-
-QString ExampleSharePlugin::pluginId() const
-{
-    return "Example-Share-Method-ID";
-}
-
-bool ExampleSharePlugin::enabled() const
-{
-    return true;
-}
-

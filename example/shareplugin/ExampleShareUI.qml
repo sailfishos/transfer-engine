@@ -31,6 +31,8 @@ import QtQuick 2.6
 import Sailfish.Silica 1.0
 import org.nemomobile.thumbnailer 1.0
 import Sailfish.TransferEngine 1.0
+// Translations
+import Sailfish.TransferEngine.Example 1.0
 
 SilicaFlickable {
     id: root
@@ -85,6 +87,7 @@ SilicaFlickable {
                     "scalePercent": 0.5
                 }
                 sailfishTransfer.start()
+                shareAction.done()
             }
         }
     }
