@@ -1,5 +1,5 @@
 Name:    nemo-transferengine-qt5
-Version: 1.0.0
+Version: 2.0.0
 Release: 0
 Summary: Transfer Engine for uploading media content and tracking transfers.
 License: LGPLv2
@@ -24,8 +24,7 @@ BuildRequires: qt5-plugin-sqldriver-sqlite
 BuildRequires: pkgconfig(qt5-boostable)
 BuildRequires: pkgconfig(systemd)
 Requires: libnemotransferengine-qt5 = %{version}
-Provides: nemo-transferengine > 0.0.19
-Obsoletes: nemo-transferengine <= 0.0.19
+Requires(post): systemd
 
 %description
 %{summary}
@@ -123,18 +122,15 @@ cp -R doc/html/* %{buildroot}/%{_docdir}/%{name}/
 mkdir -p %{buildroot}%{_datadir}/mapplauncherd/privileges.d
 install -m 644 -p %{SOURCE1} %{buildroot}%{_datadir}/mapplauncherd/privileges.d
 
-%define te_pid $(pgrep -f nemo-transfer-engine)
-
 %post -n libnemotransferengine-qt5
 /sbin/ldconfig
 
-%post -n %{name}
-if [ -n "%{te_pid}" ]
+%post
+if [ "$1" -eq 2 ]
 then
-    kill -s 10 %{te_pid}
+    systemctl-user daemon-reload || :
+    systemctl-user stop transferengine.service || :
 fi
-
-exit 0
 
 %postun -n libnemotransferengine-qt5
 /sbin/ldconfig
