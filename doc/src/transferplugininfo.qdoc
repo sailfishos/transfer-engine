@@ -1,7 +1,7 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
-** Contact: Marko Mattila <marko.mattila@jollamobile.com>
+** Copyright (c) 2013 Jolla Ltd.
+** Copyright (c) 2021 Open Mobile Platform LLC.
 ** All rights reserved.
 **
 ** This file is part of Nemo Transfer Engine package.
@@ -33,50 +33,44 @@
 ****************************************************************************************/
 
 /*!
-    \class TransferPluginInfo
-    \brief The TransferPluginInfo class is an abstract class encapsulates information about share plugin.
+    \class SharingPluginInfo
+    \brief The SharingPluginInfo class is an abstract class encapsulates information about share plugin.
 
     \ingroup transfer-engine-lib
 
-    TransferPluginInfo provides information about single share plugin via TransferMethodInfo
+    SharingPluginInfo provides information about single share plugin via SharingMethodInfo
     class. Because one plugin can support multiple accounts e.g. user can have one, two or
-    more Facebook accounts, this class provides a list of TransferMethodInfo object instances.
+    more Facebook accounts, this class provides a list of SharingMethodInfo object instances.
 */
 
 /*!
-    \fn virtual QList<TransferMethodInfo> TransferPluginInfo::info() const = 0
+    \fn virtual QList<SharingMethodInfo> SharingPluginInfo::info() const = 0
 
-    Subclass must implement this method and provide at least one TransferMethodInfo
+    Subclass must implement this method and provide at least one SharingMethodInfo
     object instance. If a plugin supports multiple accounts e.g. more than one Facebook
     account, then list must contain one TransferMethodEntry per enabled account.
 
-    Returns a list of TransferMethodInfo objects.
+    Returns a list of SharingMethodInfo objects.
 */
 
 /*!
-    \fn virtual void TransferPluginInfo::query() = 0
+    \fn virtual void SharingPluginInfo::query() = 0
 
     Subclass must implement this method and make sure that when info is available
-    infoReady() signal will be emitted. If TransferMethodInfo data is ready, calling this
+    infoReady() signal will be emitted. If SharingMethodInfo data is ready, calling this
     method should just emit infoReady() signal.
-*/
-
-/*!
-    \fn virtual bool TransferPluginInfo::ready() const = 0
-
-    Deprecated. implment this, but it won't be used.
 */
 
 /*!
     \fn void TransferPluginInfo::infoReady()
 
     Subclass must emit this signal when info() method is ready to return
-    a list of TransferMethodInfo data.
+    a list of SharingMethodInfo data.
 */
 
 /*!
     \fn void TransferPluginInfo::infoError(const QString &msg)
 
     Subclass must emit this signal with an error \a msg if there's an error i.e. info() method
-    can't return a list of TransferMethodInfo objects.
+    can't return a list of SharingMethodInfo objects.
 */

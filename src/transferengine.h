@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013 - 2019 Jolla Ltd.
- * Copyright (c) 2019 Open Mobile Platform LLC.
+ * Copyright (c) 2019 - 2021 Open Mobile Platform LLC.
  *
  * All rights reserved.
  *
@@ -32,7 +32,6 @@
 
 #include "mediatransferinterface.h"
 #include "transferdbrecord.h"
-#include "transfermethodinfo.h"
 
 class MediaTransferInterface;
 class TransferEnginePrivate;
@@ -83,11 +82,6 @@ public Q_SLOTS:
 
     QList<TransferDBRecord> activeTransfers();
 
-    QList <TransferMethodInfoDeprecated> transferMethods();
-    QList <TransferMethodInfo> transferMethods2();
-
-    QList<QVariantMap> pluginMetaData();
-
     void clearTransfers();
 
     void clearTransfer(int transferId);
@@ -102,8 +96,6 @@ Q_SIGNALS:
     void progressChanged(int transferId, double progress);
 
     void statusChanged(int transferId, int status);
-
-    void transferMethodListChanged();
 
     void transfersChanged();
 

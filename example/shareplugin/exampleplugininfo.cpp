@@ -1,6 +1,6 @@
 /******************************************************************************
-Copyright (c) <2014>, Jolla Ltd.
-Contact: Marko Mattila <marko.mattila@jolla.com>
+Copyright (c) 2014 Jolla Ltd.
+Copyright (c) 2021 Open Mobile Platform LLC.
 
 All rights reserved.
 
@@ -28,9 +28,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
 #include "exampleplugininfo.h"
+#include "exampleplugintranslator.h"
 
 ExamplePluginInfo::ExamplePluginInfo()
-    : m_ready(false)
 {
 
 }
@@ -40,48 +40,41 @@ ExamplePluginInfo::~ExamplePluginInfo()
 
 }
 
-QList<TransferMethodInfo> ExamplePluginInfo::info() const
+QList<SharingMethodInfo> ExamplePluginInfo::info() const
 {
     return m_infoList;
 }
 
 void ExamplePluginInfo::query()
 {
-    TransferMethodInfo info;
+    // Translations must be loaded here and also in QML through plugin.
+    ExamplePluginTranslator::load();
+
+    SharingMethodInfo info;
     QStringList capabilities;
 
-    // Capabilites ie. what mimetypes this plugin supports
+    // Capabilities ie. what mimetypes this plugin supports
     capabilities << QLatin1String("image/*")
                  << QLatin1String("text/vcard");
 
-    // TODO: Translations for 3rd party plugins is not yet supported by Sailfish OS.
-    //       Adding support there later, but for now just use what ever non-translated
-    //       string here. This string will be visible in the share method list.
     //: Display name for example share plugin
     //% "Example plugin"
-    info.displayName     = qtTrId("example-localization-li-id");
+    info.setDisplayName(qtTrId("example-localization-li-id"));
 
     // Method ID is a unique identifier for this plugin. It is used to identify which share plugin should be
     // used for starting the sharing.
-    info.methodId        = QLatin1String("Example-Share-Method-ID");
+    info.setMethodId(QLatin1String("Example-Share-Method-ID"));
 
     // Path to the Sharing UI which this plugin provides.
-    info.shareUIPath     = QLatin1String("/usr/share/nemo-transferengine/plugins/ExampleShareUI.qml");
+    info.setShareUIPath(QLatin1String("/usr/share/nemo-transferengine/plugins/sharing/ExampleShareUI.qml"));
 
     // Pass information about capabilities. This info is used for filtering share plugins
     // which don't support defined types. For example, this plugin won't appear in the
     // share method list, if someone tries to share content which isn't image or vcard type,
-    info.capabilitities  = capabilities;
+    info.setCapabilities(capabilities);
 
     m_infoList << info;
 
     // Let the world know that this plugin is ready
-    m_ready = true;
     emit infoReady();
-}
-
-
-bool ExamplePluginInfo::ready() const
-{
-    return m_ready;
 }

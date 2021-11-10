@@ -1,0 +1,4 @@
+/RPMS/
+/translations/*.qm
+/translations/*.ts
+*.moc

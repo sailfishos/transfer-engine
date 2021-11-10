@@ -20,7 +20,7 @@ transferengine.header_flags = -i metatypedeclarations.h -i transferengine.h -l T
 transferengine.source_flags = -l TransferEngine -c TransferEngineAdaptor
 
 CONFIG += link_pkgconfig
-PKGCONFIG += accounts-qt5 nemonotifications-qt5
+PKGCONFIG += nemonotifications-qt5
 
 # translations
 TS_FILE = $$OUT_PWD/nemo-transfer-engine.ts
@@ -62,7 +62,7 @@ HEADERS += \
     transferengine.h \
     transferengine_p.h
 
-DEFINES += SHARE_PLUGINS_PATH=\"\\\"$$[QT_INSTALL_LIBS]/nemo-transferengine/plugins\\\"\"
+DEFINES += TRANSFER_PLUGINS_PATH=\"\\\"$$[QT_INSTALL_LIBS]/nemo-transferengine/plugins/transfer\\\"\"
 
 SERVICE_FILE += ../dbus/org.nemo.transferengine.service
 OTHER_FILES +=  $$SERVICE_FILE \

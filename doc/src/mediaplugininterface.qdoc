@@ -1,7 +1,7 @@
 /****************************************************************************************
 **
-** Copyright (C) 2013 Jolla Ltd.
-** Contact: Marko Mattila <marko.mattila@jollamobile.com>
+** Copyright (c) 2013 Jolla Ltd.
+** Copyright (c) 2021 Open Mobile Platform LLC.
 ** All rights reserved.
 **
 ** This file is part of Nemo Transfer Engine package.
@@ -34,16 +34,15 @@
 
 /*!
     \class TransferPluginInterface
-    \brief The TransferPluginInterface class defines an abstract interface for each TransferEngine share plugins to implement.
+    \brief The TransferPluginInterface class defines an abstract interface for each TransferEngine transfer plugins to implement.
 
     \ingroup transfer-engine-lib
 
-    TransferEngine supports C++ share plugins. Each share plugin must implement couple of well defined interfaces:
+    TransferEngine supports C++ transfer plugins. Each transfer plugin must implement couple of well defined interfaces:
 
     \list
         \li \l TransferPluginInterface Provides interfaces to access required objects to start sharing.
         \li \l MediaTransferInterface  Implements the actual sharing functionality
-        \li \l TransferPluginInfo      Provides information about plugin status such as is it ready.
     \endlist
 
     TransferPluginInterface provides information to the TransferEngine via this interface.
@@ -56,21 +55,7 @@
  */
 
 /*!
-   \fn virtual TransferPluginInfo *TransferPluginInterface::infoObject() = 0
-
-   Return TransferPluginInfo object
- */
-
-/*!
    \fn virtual QString TransferPluginInterface::pluginId() const = 0
 
    Return a plugin id e.g. Facebook, Twitter, etc.
  */
-
-/*!
-   \fn virtual bool TransferPluginInterface::enabled() const = 0
-
-   Return true or false depending if the plugin is enabled or not
- */
-
-

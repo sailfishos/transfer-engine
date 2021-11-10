@@ -1,5 +1,5 @@
 Name:    nemo-transferengine-qt5
-Version: 1.0.0
+Version: 2.0.0
 Release: 0
 Summary: Transfer Engine for uploading media content and tracking transfers.
 License: LGPLv2
@@ -24,8 +24,7 @@ BuildRequires: qt5-plugin-sqldriver-sqlite
 BuildRequires: pkgconfig(qt5-boostable)
 BuildRequires: pkgconfig(systemd)
 Requires: libnemotransferengine-qt5 = %{version}
-Provides: nemo-transferengine > 0.0.19
-Obsoletes: nemo-transferengine <= 0.0.19
+Requires(post): systemd
 
 %description
 %{summary}
@@ -33,7 +32,8 @@ Obsoletes: nemo-transferengine <= 0.0.19
 %files
 %defattr(-,root,root,-)
 %{_userunitdir}/transferengine.service
-%dir %{_datadir}/nemo-transferengine
+%{_libdir}/nemo-transferengine
+%{_datadir}/nemo-transferengine
 %{_bindir}/nemo-transfer-engine
 %{_datadir}/dbus-1/services/org.nemo.transferengine.service
 %{_datadir}/translations/*.qm
@@ -111,7 +111,9 @@ make docs
 
 %install
 rm -rf %{buildroot}
-mkdir -p %{buildroot}/%{_datadir}/nemo-transferengine
+mkdir -p %{buildroot}/%{_datadir}/nemo-transferengine/plugins/sharing
+mkdir -p %{buildroot}/%{_libdir}/nemo-transferengine/plugins/sharing
+mkdir -p %{buildroot}/%{_libdir}/nemo-transferengine/plugins/transfer
 %qmake5_install
 
 mkdir -p %{buildroot}/%{_docdir}/%{name}
@@ -120,18 +122,15 @@ cp -R doc/html/* %{buildroot}/%{_docdir}/%{name}/
 mkdir -p %{buildroot}%{_datadir}/mapplauncherd/privileges.d
 install -m 644 -p %{SOURCE1} %{buildroot}%{_datadir}/mapplauncherd/privileges.d
 
-%define te_pid $(pgrep -f nemo-transfer-engine)
-
 %post -n libnemotransferengine-qt5
 /sbin/ldconfig
 
-%post -n %{name}
-if [ -n "%{te_pid}" ]
+%post
+if [ "$1" -eq 2 ]
 then
-    kill -s 10 %{te_pid}
+    systemctl-user daemon-reload || :
+    systemctl-user stop transferengine.service || :
 fi
-
-exit 0
 
 %postun -n libnemotransferengine-qt5
 /sbin/ldconfig

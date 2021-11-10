@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2021 Open Mobile Platform LLC.
  *
  * All rights reserved.
  *
@@ -26,8 +27,6 @@
 #define TRANSFERPLUGININTERFACE_H
 
 #include <QtPlugin>
-#include "transferplugininfo.h"
-
 
 class MediaTransferInterface;
 class TransferPluginInterface
@@ -35,11 +34,7 @@ class TransferPluginInterface
 public:
     virtual MediaTransferInterface * transferObject() = 0;
 
-    virtual TransferPluginInfo *infoObject() = 0;
-
     virtual QString pluginId() const = 0;
-
-    virtual bool enabled() const = 0;
 };
 
 Q_DECLARE_INTERFACE(TransferPluginInterface, "org.nemo.TransferPluginInterface/1.0")

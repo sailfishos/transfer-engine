@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013 - 2019 Jolla Ltd.
+ * Copyright (c) 2021 Open Mobile Platform LLC.
  *
  * All rights reserved.
  *
@@ -26,15 +27,12 @@
 #define METATYPEDECLARATIONS_H
 
 #include "transferdbrecord.h"
-#include "transfermethodinfo.h"
+#include "sharingmethodinfo.h"
 #include <QList>
 
 Q_DECLARE_METATYPE(TransferDBRecord)
 Q_DECLARE_METATYPE(QList<TransferDBRecord>)
-Q_DECLARE_METATYPE(TransferMethodInfoDeprecated)
-Q_DECLARE_METATYPE(QList<TransferMethodInfoDeprecated>)
-Q_DECLARE_METATYPE(TransferMethodInfo)
-Q_DECLARE_METATYPE(QList<TransferMethodInfo>)
-
+Q_DECLARE_METATYPE(SharingMethodInfo)
+Q_DECLARE_METATYPE(QList<SharingMethodInfo>)
 
 #endif // METATYPEDECLARATIONS_H
