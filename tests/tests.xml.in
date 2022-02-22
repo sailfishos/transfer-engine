@@ -2,9 +2,9 @@
 <testdefinition version="1.0">
    <suite name="@PACKAGENAME@-tests" domain="middleware">
        <description>Nemo Transfer Engine automatic tests</description>
-       <set name="@PACKAGENAME@-test0" feature="Internal UI Components">
+       <set name="@PACKAGENAME@-test0" feature="nemo-transferengine-qt5-tests">
            <description>Nemo Transfer Engine unit tests</description>
-           <case manual="false" name="enginetests">
+           <case manual="false" name="ut_nemo-transfer-engine">
                <step>cd /opt/tests/@PACKAGENAME@/ &amp;&amp; ./ut_nemo-transfer-engine</step>
            </case>
        </set>
