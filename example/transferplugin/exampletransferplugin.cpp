@@ -31,20 +31,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "exampleuploader.h"
 #include <QtPlugin>
 
-ExampleSharePlugin::ExampleSharePlugin()
+ExampleTransferPlugin::ExampleTransferPlugin()
 {
 }
 
-ExampleSharePlugin::~ExampleSharePlugin()
+ExampleTransferPlugin::~ExampleTransferPlugin()
 {
 }
 
-MediaTransferInterface * ExampleSharePlugin::transferObject()
+MediaTransferInterface * ExampleTransferPlugin::transferObject()
 {
     return new ExampleUploader;
 }
 
-QString ExampleSharePlugin::pluginId() const
+QString ExampleTransferPlugin::pluginId() const
 {
     return "Example-Share-Method-ID";
 }
