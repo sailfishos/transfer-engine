@@ -32,7 +32,10 @@ OTHER_FILES = qmldir *.qml *.js
 
 target.path = $$[QT_INSTALL_QML]/$$replace(uri, \\., /)
 
-qmldir.files = qmldir *.qml *.js
+qmldir.files = qmldir plugins.qmltypes *.qml *.js
 qmldir.path = $$target.path
 
 INSTALLS += target qmldir
+
+qmltypes.commands = qmlplugindump -nonrelocatable $$uri 1.0 > $$PWD/plugins.qmltypes
+QMAKE_EXTRA_TARGETS += qmltypes
