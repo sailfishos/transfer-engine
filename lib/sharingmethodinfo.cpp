@@ -43,6 +43,7 @@ public:
 };
 
 SharingMethodInfoPrivate::SharingMethodInfoPrivate()
+    : supportsMultipleFiles(false)
 {
 }
 
