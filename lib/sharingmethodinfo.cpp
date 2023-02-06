@@ -43,7 +43,8 @@ public:
 };
 
 SharingMethodInfoPrivate::SharingMethodInfoPrivate()
-    : supportsMultipleFiles(false)
+    : accountId(0)
+    , supportsMultipleFiles(false)
 {
 }
 
@@ -76,8 +77,6 @@ SharingMethodInfoPrivate::SharingMethodInfoPrivate(const SharingMethodInfoPrivat
         capabilities << QLatin1String("*");
 
         info.setDisplayName(QLatin1String("Bluetooth"));
-        info.setSubtitle("");
-        info.setAccountId("");
         info.setMethodIcon(QLatin1String("image://theme/icon-m-bluetooth"));
         info.setMethodId(QLatin1String("bluetooth"));
         info.setShareUIPath(SHARE_UI_PATH + QLatin1String("/BluetoothShareUI.qml"));
