@@ -840,7 +840,7 @@ int TransferEngine::uploadMediaItemContent(const QVariantMap &content,
         \li \a displayName  The name for Download which may be used by the UI displaying the download
         \li \a applicationIcon The application icon of the application created the download
         \li \a serviceIcon The service icon, which provides the file to be downloaded
-        \li \a filePath The filePath e.g. url to the file to be downloaded
+        \li \a filePath The filePath to the file to be downloaded
         \li \a mimeType the MimeType of the file to be downloaded
         \li \a expectedFileSize The file size of the file to be downloaded
         \li \a callback QStringList containing DBus callback information such as: service, path and interface
@@ -865,7 +865,7 @@ int TransferEngine::createDownload(const QString &displayName,
                                    const QString &restartMethod)
 {
     Q_D(TransferEngine);
-    QUrl url(filePath);
+    QUrl url = QUrl::fromLocalFile(filePath);
     QFileInfo fileInfo(filePath);
 
     MediaItem *mediaItem = new MediaItem();
