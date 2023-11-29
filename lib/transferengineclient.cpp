@@ -136,9 +136,9 @@ public:
 
     // Create the sync event
     int transferId = client->createSyncEvent("Syncing data from my service",
-                                           QUrl("image://theme/icon-launcher-my-app"),
-                                           QUrl("image://theme/icon-s-service-icon"),
-                                           callback);
+                                             QUrl("image://theme/icon-launcher-my-app"),
+                                             QUrl("image://theme/icon-s-service-icon"),
+                                             callback);
 
     // Start the actual transfer i.e. sync
     client->startTransfer(transferId)
@@ -159,10 +159,10 @@ public:
     TransferEngineClient status;
     QString reason;
     if (ok) {
-     status = TransferEngineClient::TransferFinished;
+        status = TransferEngineClient::TransferFinished;
     } else {
-     status = TransferEngineClient::TransferInterrupted;
-     reason = "Something went wrong";
+        status = TransferEngineClient::TransferInterrupted;
+        reason = "Something went wrong";
     }
 
     client->finishTransfer(transferId, status, reason);
@@ -205,7 +205,7 @@ TransferEngineClient::~TransferEngineClient()
     Creates a download event to the TransferEngine. This method requires the following parameters
     \a displayName, a human readable name for the entry. \a applicationIcon is the \c QUrl to the icon
     of the application, who's calling this method. Usually it can be in format "image://theme/icon-s-something".
-    \a serviceIcon is a service specific icon such as DropBox. \a url is the url to the media to be downloaded.
+    \a serviceIcon is a service specific icon such as DropBox. \a url is the url to the local file to be downloaded.
     \a mimeType is the mimeType of the media and \a expectedFileSize is the file size of the file to be downloaded.
 
     Client can define callback functions for canceling and restarting download. For that client can provide
@@ -225,18 +225,18 @@ TransferEngineClient::~TransferEngineClient()
     \sa createSyncEvent(), startTransfer(), updateTransferProgress(), finishTransfer()
  */
 int TransferEngineClient::createDownloadEvent(const QString &displayName,
-                                                      const QUrl &applicationIcon,
-                                                      const QUrl &serviceIcon,
-                                                      const QUrl &url,
-                                                      const QString &mimeType,
-                                                      qlonglong expectedFileSize,
-                                                      const CallbackInterface &callback)
+                                              const QUrl &applicationIcon,
+                                              const QUrl &serviceIcon,
+                                              const QUrl &url,
+                                              const QString &mimeType,
+                                              qlonglong expectedFileSize,
+                                              const CallbackInterface &callback)
 {
     Q_D(const TransferEngineClient);
     QDBusPendingReply<int> reply = d->m_client->createDownload(displayName,
                                                                applicationIcon.toString(),
                                                                serviceIcon.toString(),
-                                                               url.toString(),
+                                                               url.toLocalFile(),
                                                                mimeType,
                                                                expectedFileSize,
                                                                callback.d_func()->callback,
@@ -269,9 +269,9 @@ int TransferEngineClient::createDownloadEvent(const QString &displayName,
     \sa startTransfer(), updateTransferProgress(), finishTransfer()
  */
 int TransferEngineClient::createSyncEvent(const QString &displayName,
-                                                  const QUrl &applicationIcon,
-                                                  const QUrl &serviceIcon,
-                                                  const CallbackInterface &callback)
+                                          const QUrl &applicationIcon,
+                                          const QUrl &serviceIcon,
+                                          const CallbackInterface &callback)
 {
     Q_D(const TransferEngineClient);
     QDBusPendingReply<int> reply = d->m_client->createSync(displayName,
