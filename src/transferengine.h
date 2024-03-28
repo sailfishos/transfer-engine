@@ -61,7 +61,8 @@ public Q_SLOTS:
                        qlonglong expectedFileSize,
                        const QStringList &callback,
                        const QString &cancelMethod,
-                       const QString &restartMethod);
+                       const QString &restartMethod,
+                       const bool privateTransfer);
 
     int createSync(const QString &displayName,
                    const QString &applicationIcon,

@@ -73,8 +73,9 @@ public:
     \value Description      Description for the media item to be transfered
     \value ServiceIcon      Service icon URL e.g. email service
     \value ApplicationIcon  Application icon url
-    \value AccountId,       Account Id
+    \value AccountId        Account Id
     \value UserData         User specific data that is passed from the UI
+    \value Private          Do not save transfer data
     \value Callback         Callback service, path, interface packed to QStringList
     \value CancelCBMethod   Cancel callback method name
     \value RestartCBMethod  Restart callback method name

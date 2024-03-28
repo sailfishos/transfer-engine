@@ -64,6 +64,7 @@ public:
                             const QUrl &url,
                             const QString &mimeType,
                             qlonglong expectedFileSize,
+                            const bool privateTransfer,
                             const CallbackInterface &callback = CallbackInterface());
 
 

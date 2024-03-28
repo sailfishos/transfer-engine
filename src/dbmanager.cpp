@@ -81,6 +81,7 @@
                         "cancel_supported INTEGER,\n" \
                         "restart_supported INTEGER,\n" \
                         "notification_id INTEGER\n" \
+                        "private INTEGER\n" \
                         ");\n"
 
 // Cascade trigger i.e. when transfer is removed and it has metadata or callbacks, this
@@ -94,7 +95,7 @@
                         "END;\n"
 
 // Update the following version if database schema changes.
-#define USER_VERSION 2
+#define USER_VERSION 3
 #define PRAGMA_USER_VERSION   QString("PRAGMA user_version=%1").arg(USER_VERSION)
 
 class DbManagerPrivate {
@@ -263,6 +264,23 @@ DbManager::DbManager():
             }
         }
 
+        if (d->userVersion() == 2) {
+            // For this we get away with DeclarativeTransferModel directly reading database without
+            // update because private is the last column
+            QSqlQuery query;
+            if (query.exec("ALTER TABLE transfers ADD COLUMN private INTEGER")) {
+                qWarning() << "Extended transfers table for private column";
+
+                if (!query.exec(PRAGMA_USER_VERSION)) {
+                    qWarning() << "DbManager pragma user_version update:"
+                               << query.lastError().text() << ":" << query.lastError().databaseText();
+                }
+            } else {
+                qWarning() << "Failed to extend transfers table for private column!"
+                           << query.lastError().text() << ":" << query.lastError().databaseText();
+            }
+        }
+
         if (d->userVersion() != USER_VERSION) {
             d->deleteOldTables();
             d->createDatabaseSchema();
@@ -425,10 +443,10 @@ int DbManager::createTransferEntry(const MediaItem *mediaItem)
     QSqlQuery query;
     query.prepare("INSERT INTO transfers (transfer_type, timestamp, status, progress, display_name, application_icon, thumbnail_icon, "
                   "  service_icon, url, resource_name, mime_type, file_size, plugin_id, account_id, strip_metadata, scale_percent, "
-                  "  cancel_supported, restart_supported, notification_id)"
+                  "  cancel_supported, restart_supported, notification_id, private)"
                   "VALUES (:transfer_type, :timestamp, :status, :progress, :display_name, :application_icon, :thumbnail_icon, "
                   "  :service_icon, :url, :resource_name, :mime_type, :file_size, :plugin_id, :account_id, :strip_metadata, :scale_percent, "
-                  "  :cancel_supported, :restart_supported, :notification_id)");
+                  "  :cancel_supported, :restart_supported, :notification_id, :private)");
     query.bindValue(":transfer_type",       mediaItem->value(MediaItem::TransferType));
     query.bindValue(":status",              TransferEngineData::NotStarted);
     query.bindValue(":timestamp",           d->currentDateTime());
@@ -448,6 +466,7 @@ int DbManager::createTransferEntry(const MediaItem *mediaItem)
     query.bindValue(":cancel_supported",    mediaItem->value(MediaItem::CancelSupported));
     query.bindValue(":restart_supported",   mediaItem->value(MediaItem::RestartSupported));
     query.bindValue(":notification_id",     0);
+    query.bindValue(":private",             mediaItem->value(MediaItem::Private).toBool() ? 1 : 0);
 
     if (!query.exec()) {
         qWarning() << "DbManager::createTransferEntry: Failed to execute SQL query. Couldn't create an entry!"
@@ -702,8 +721,8 @@ QList<TransferDBRecord> DbManager::transfers(TransferEngineData::TransferStatus 
     // TODO: This should order the result based on timestamp
     QList<TransferDBRecord> records;
     QString queryStr = (status == TransferEngineData::Unknown) ?
-        QString("SELECT * FROM transfers ORDER BY transfer_id DESC") :
-        QString("SELECT * FROM transfers WHERE status='%1' ORDER BY transfer_id DESC").arg(status);
+        QString("SELECT * FROM transfers WHERE private=0 ORDER BY transfer_id DESC") :
+        QString("SELECT * FROM transfers WHERE private=0 AND status='%1' ORDER BY transfer_id DESC").arg(status);
     QSqlQuery query;
     if (!query.exec(queryStr)) {
         qWarning() << "DbManager::transfers: Failed to execute SQL query. Couldn't get list of transfers!";

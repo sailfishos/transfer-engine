@@ -846,6 +846,7 @@ int TransferEngine::uploadMediaItemContent(const QVariantMap &content,
         \li \a callback QStringList containing DBus callback information such as: service, path and interface
         \li \a cancelMethod The name of the cancel callback method, which DBus callback provides
         \li \a restartMethod The name of the restart callback method, which DBus callback provides
+        \li \a privateTransfer If true, hide transfer from history
     \endlist
 
     This method returns the transfer id of the created Download transfer. Note that this method only
@@ -862,7 +863,8 @@ int TransferEngine::createDownload(const QString &displayName,
                                    qlonglong expectedFileSize,
                                    const QStringList &callback,
                                    const QString &cancelMethod,
-                                   const QString &restartMethod)
+                                   const QString &restartMethod,
+                                   const bool privateTransfer)
 {
     Q_D(TransferEngine);
     QUrl url = QUrl::fromLocalFile(filePath);
@@ -877,6 +879,7 @@ int TransferEngine::createDownload(const QString &displayName,
     mediaItem->setValue(MediaItem::DisplayName,     displayName);
     mediaItem->setValue(MediaItem::ApplicationIcon, applicationIcon);
     mediaItem->setValue(MediaItem::ServiceIcon,     serviceIcon);
+    mediaItem->setValue(MediaItem::Private,         privateTransfer);
     mediaItem->setValue(MediaItem::Callback,        callback);
     mediaItem->setValue(MediaItem::CancelCBMethod,  cancelMethod);
     mediaItem->setValue(MediaItem::RestartCBMethod, restartMethod);
