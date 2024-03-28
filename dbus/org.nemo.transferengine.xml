@@ -45,6 +45,7 @@
             <arg direction="in" type="as" name="callback"/>
             <arg direction="in" type="s" name="cancelMethod"/>
             <arg direction="in" type="s" name="restartMethod"/>
+            <arg direction="in" type="b" name="privateTransfer"/>
             <arg direction="out" type="i" name="transferId"/>
         </method>
 

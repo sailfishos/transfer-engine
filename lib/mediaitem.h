@@ -53,6 +53,7 @@ public:
         ThumbnailIcon,
         AccountId,
         UserData,
+        Private,
 
         // Callback methods comes from the API, not from the plugins
         Callback,

@@ -230,6 +230,7 @@ int TransferEngineClient::createDownloadEvent(const QString &displayName,
                                               const QUrl &url,
                                               const QString &mimeType,
                                               qlonglong expectedFileSize,
+                                              const bool privateTransfer,
                                               const CallbackInterface &callback)
 {
     Q_D(const TransferEngineClient);
@@ -241,7 +242,8 @@ int TransferEngineClient::createDownloadEvent(const QString &displayName,
                                                                expectedFileSize,
                                                                callback.d_func()->callback,
                                                                callback.d_func()->m_cancelMethod,
-                                                               callback.d_func()->m_restartMethod);
+                                                               callback.d_func()->m_restartMethod,
+                                                               privateTransfer);
     reply.waitForFinished();
 
     if (reply.isError()) {
