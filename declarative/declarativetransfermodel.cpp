@@ -84,7 +84,7 @@ TransferModel::Status TransferModel::status() const
 
 void TransferModel::refresh()
 {
-    if (!m_complete || m_roles.isEmpty()) {
+    if (!m_complete) {
         return;
     }
 
@@ -199,12 +199,12 @@ void TransferModel::componentComplete()
                                            QDBusConnection::sessionBus(),
                                            this);
 
-    connect(m_client,   SIGNAL(progressChanged(int,double)),
-            this,       SLOT(refresh()));
-    connect(m_client,   SIGNAL(transfersChanged()),
-            this,       SLOT(refresh()));
-    connect(m_client,   SIGNAL(statusChanged(int,int)),
-            this,       SLOT(refresh()));
+    connect(m_client, SIGNAL(progressChanged(int,double)),
+            this, SLOT(refresh()));
+    connect(m_client, SIGNAL(transfersChanged()),
+            this, SLOT(refresh()));
+    connect(m_client, SIGNAL(statusChanged(int,int)),
+            this, SLOT(refresh()));
 }
 
 void TransferModel::insertRange(
@@ -411,7 +411,12 @@ QSqlDatabase TransferModel::database()
                                 + DB_PATH + QDir::separator()
                                 + DB_NAME;
 
-	TransferDatabase database;
+        if (!QFile::exists(absDbPath)) {
+            qWarning() << "Database file doesn't exist:" << absDbPath;
+            return QSqlDatabase();
+        }
+
+        TransferDatabase database;
         database.setDatabaseName(absDbPath);
         database.setConnectOptions(QLatin1String("QSQLITE_OPEN_READONLY")); // sanity check
         thread_database.setLocalData(database);
