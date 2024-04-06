@@ -63,6 +63,17 @@ public Q_SLOTS:
                        const QString &cancelMethod,
                        const QString &restartMethod);
 
+    int createTransientDownload(const QString &displayName,
+                                const QString &applicationIcon,
+                                const QString &serviceIcon,
+                                const QString &filePath,
+                                const QString &mimeType,
+                                qlonglong expectedFileSize,
+                                bool transient,
+                                const QStringList &callback,
+                                const QString &cancelMethod,
+                                const QString &restartMethod);
+
     int createSync(const QString &displayName,
                    const QString &applicationIcon,
                    const QString &serviceIcon,

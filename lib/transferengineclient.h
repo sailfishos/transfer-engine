@@ -66,6 +66,15 @@ public:
                             qlonglong expectedFileSize,
                             const CallbackInterface &callback = CallbackInterface());
 
+    int createDownloadEvent(const QString &displayName,
+                            const QUrl &applicationIcon,
+                            const QUrl &serviceIcon,
+                            const QUrl &url,
+                            const QString &mimeType,
+                            qlonglong expectedFileSize,
+                            bool transient,
+                            const CallbackInterface &callback = CallbackInterface());
+
 
     int createSyncEvent(const QString &displayName,
                         const QUrl &applicationIcon,

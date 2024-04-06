@@ -202,6 +202,20 @@ TransferEngineClient::~TransferEngineClient()
 }
 
 /*!
+    Overloaded method of createDownloadEvent() for compatibility.
+ */
+int TransferEngineClient::createDownloadEvent(const QString &displayName,
+                                              const QUrl &applicationIcon,
+                                              const QUrl &serviceIcon,
+                                              const QUrl &url,
+                                              const QString &mimeType,
+                                              qlonglong expectedFileSize,
+                                              const CallbackInterface &callback)
+{
+    return createDownloadEvent(displayName, applicationIcon, serviceIcon, url, mimeType, expectedFileSize, false, callback);
+}
+
+/*!
     Creates a download event to the TransferEngine. This method requires the following parameters
     \a displayName, a human readable name for the entry. \a applicationIcon is the \c QUrl to the icon
     of the application, who's calling this method. Usually it can be in format "image://theme/icon-s-something".
@@ -230,22 +244,24 @@ int TransferEngineClient::createDownloadEvent(const QString &displayName,
                                               const QUrl &url,
                                               const QString &mimeType,
                                               qlonglong expectedFileSize,
+                                              bool transient,
                                               const CallbackInterface &callback)
 {
     Q_D(const TransferEngineClient);
-    QDBusPendingReply<int> reply = d->m_client->createDownload(displayName,
-                                                               applicationIcon.toString(),
-                                                               serviceIcon.toString(),
-                                                               url.toLocalFile(),
-                                                               mimeType,
-                                                               expectedFileSize,
-                                                               callback.d_func()->callback,
-                                                               callback.d_func()->m_cancelMethod,
-                                                               callback.d_func()->m_restartMethod);
+    QDBusPendingReply<int> reply = d->m_client->createTransientDownload(displayName,
+                                                                        applicationIcon.toString(),
+                                                                        serviceIcon.toString(),
+                                                                        url.toLocalFile(),
+                                                                        mimeType,
+                                                                        expectedFileSize,
+                                                                        transient,
+                                                                        callback.d_func()->callback,
+                                                                        callback.d_func()->m_cancelMethod,
+                                                                        callback.d_func()->m_restartMethod);
     reply.waitForFinished();
 
     if (reply.isError()) {
-        qWarning() << "TransferEngineClient::createDownloadEvent: failed to get transfer ID!";
+        qWarning() << "TransferEngineClient::createTransientDownloadEvent: failed to get transfer ID!";
         return false;
     }
 

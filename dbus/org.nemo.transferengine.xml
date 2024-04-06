@@ -48,6 +48,21 @@
             <arg direction="out" type="i" name="transferId"/>
         </method>
 
+        # create transient Download entry
+        <method name="createTransientDownload">
+            <arg direction="in" type="s" name="displayName"/>
+            <arg direction="in" type="s" name="applicationIcon"/>
+            <arg direction="in" type="s" name="serviceIcon"/>
+            <arg direction="in" type="s" name="filePath"/>
+            <arg direction="in" type="s" name="mimeType"/>
+            <arg direction="in" type="x" name="expectedFileSize"/>
+            <arg direction="in" type="b" name="transient"/>
+            <arg direction="in" type="as" name="callback"/>
+            <arg direction="in" type="s" name="cancelMethod"/>
+            <arg direction="in" type="s" name="restartMethod"/>
+            <arg direction="out" type="i" name="transferId"/>
+        </method>
+
         # API for updating either download or sync
         <method name="updateTransferProgress">
             <arg direction="in" type="i" name="transferId"/>

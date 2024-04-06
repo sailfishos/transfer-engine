@@ -832,6 +832,23 @@ int TransferEngine::uploadMediaItemContent(const QVariantMap &content,
 }
 
 /*!
+    Call createTransientDownload() for compatibility.
+ */
+int TransferEngine::createDownload(const QString &displayName,
+                                   const QString &applicationIcon,
+                                   const QString &serviceIcon,
+                                   const QString &filePath,
+                                   const QString &mimeType,
+                                   qlonglong expectedFileSize,
+                                   const QStringList &callback,
+                                   const QString &cancelMethod,
+                                   const QString &restartMethod)
+{
+    return createTransientDownload(displayName, applicationIcon, serviceIcon, filePath, mimeType,
+                                   expectedFileSize, false, callback, cancelMethod, restartMethod);
+}
+
+/*!
     DBus adaptor calls this method to create a download entry. Note that this is purely write-only
     method and doesn't involve anything else from TransferEngine side than creating a new DB record
     of type 'Download'.
@@ -843,6 +860,7 @@ int TransferEngine::uploadMediaItemContent(const QVariantMap &content,
         \li \a filePath The filePath to the file to be downloaded
         \li \a mimeType the MimeType of the file to be downloaded
         \li \a expectedFileSize The file size of the file to be downloaded
+        \li \a transient If true, do not show transfer data in the history
         \li \a callback QStringList containing DBus callback information such as: service, path and interface
         \li \a cancelMethod The name of the cancel callback method, which DBus callback provides
         \li \a restartMethod The name of the restart callback method, which DBus callback provides
@@ -854,15 +872,16 @@ int TransferEngine::uploadMediaItemContent(const QVariantMap &content,
 
     \sa startTransfer(), restartTransfer(), finishTransfer(), updateTransferProgress()
  */
-int TransferEngine::createDownload(const QString &displayName,
-                                   const QString &applicationIcon,
-                                   const QString &serviceIcon,
-                                   const QString &filePath,
-                                   const QString &mimeType,
-                                   qlonglong expectedFileSize,
-                                   const QStringList &callback,
-                                   const QString &cancelMethod,
-                                   const QString &restartMethod)
+int TransferEngine::createTransientDownload(const QString &displayName,
+                                            const QString &applicationIcon,
+                                            const QString &serviceIcon,
+                                            const QString &filePath,
+                                            const QString &mimeType,
+                                            qlonglong expectedFileSize,
+                                            bool transient,
+                                            const QStringList &callback,
+                                            const QString &cancelMethod,
+                                            const QString &restartMethod)
 {
     Q_D(TransferEngine);
     QUrl url = QUrl::fromLocalFile(filePath);
@@ -877,6 +896,7 @@ int TransferEngine::createDownload(const QString &displayName,
     mediaItem->setValue(MediaItem::DisplayName,     displayName);
     mediaItem->setValue(MediaItem::ApplicationIcon, applicationIcon);
     mediaItem->setValue(MediaItem::ServiceIcon,     serviceIcon);
+    mediaItem->setValue(MediaItem::Transient,       transient);
     mediaItem->setValue(MediaItem::Callback,        callback);
     mediaItem->setValue(MediaItem::CancelCBMethod,  cancelMethod);
     mediaItem->setValue(MediaItem::RestartCBMethod, restartMethod);
@@ -887,7 +907,7 @@ int TransferEngine::createDownload(const QString &displayName,
     d->m_activityMonitor->newActivity(key);
     d->m_keyTypeCache.insert(key, TransferEngineData::Download);
     emit transfersChanged();
-    emit statusChanged(key, TransferEngineData::NotStarted);    
+    emit statusChanged(key, TransferEngineData::NotStarted);
     return key;
 }
 

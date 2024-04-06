@@ -73,8 +73,9 @@ public:
     \value Description      Description for the media item to be transfered
     \value ServiceIcon      Service icon URL e.g. email service
     \value ApplicationIcon  Application icon url
-    \value AccountId,       Account Id
+    \value AccountId        Account Id
     \value UserData         User specific data that is passed from the UI
+    \value Transient        Flag to indicate if it should be shown in the transfer list or not.
     \value Callback         Callback service, path, interface packed to QStringList
     \value CancelCBMethod   Cancel callback method name
     \value RestartCBMethod  Restart callback method name

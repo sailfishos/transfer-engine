@@ -356,7 +356,7 @@ bool TransferModel::executeQuery(QVector<TransferDBRecord> *rows, int *activeTra
     QSqlQuery query(db);
     query.setForwardOnly(true);
 
-    if (!query.exec(QString(QStringLiteral("SELECT * FROM transfers ORDER BY transfer_id DESC")))) {
+    if (!query.exec(QString(QStringLiteral("SELECT * FROM transfers WHERE transient=0 ORDER BY transfer_id DESC")))) {
         qWarning() << Q_FUNC_INFO;
         qWarning() << "Failed to create tmp table";
         qWarning() << query.lastQuery();
