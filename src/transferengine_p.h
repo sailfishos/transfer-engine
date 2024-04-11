@@ -68,7 +68,7 @@ public Q_SLOTS:
     void checkActivity();
 
 Q_SIGNALS:
-    void transfersExpired(QList<int> transferIds);
+    void transfersExpired(const QList<int> &transferIds);
 
 private:
     // Map for transferId, timestamps
