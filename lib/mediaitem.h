@@ -75,7 +75,7 @@ protected:
 
 
 private:
-    MediaItemPrivate *d_ptr;
+    MediaItemPrivate *d_ptr = nullptr;
     Q_DECLARE_PRIVATE(MediaItem)
     friend class TransferEngine;
     friend class TransferEnginePrivate;

@@ -29,36 +29,15 @@
 class SharingMethodInfoPrivate
 {
 public:
-    SharingMethodInfoPrivate();
-    SharingMethodInfoPrivate(const SharingMethodInfoPrivate *other);
-
     QString displayName;
     QString subtitle;
     QString methodId;
     QString methodIcon;
-    quint32 accountId;
+    quint32 accountId = 0;
     QString shareUIPath;
     QStringList capabilities;
-    bool supportsMultipleFiles;
+    bool supportsMultipleFiles = false;
 };
-
-SharingMethodInfoPrivate::SharingMethodInfoPrivate()
-    : accountId(0)
-    , supportsMultipleFiles(false)
-{
-}
-
-SharingMethodInfoPrivate::SharingMethodInfoPrivate(const SharingMethodInfoPrivate *other)
-    : displayName(other->displayName)
-    , subtitle(other->subtitle)
-    , methodId(other->methodId)
-    , methodIcon(other->methodIcon)
-    , accountId(other->accountId)
-    , shareUIPath(other->shareUIPath)
-    , capabilities(other->capabilities)
-    , supportsMultipleFiles(other->supportsMultipleFiles)
-{
-}
 
 /*!
     \class SharingMethodInfo
@@ -98,15 +77,7 @@ SharingMethodInfo::SharingMethodInfo()
 */
 SharingMethodInfo &SharingMethodInfo::operator=(const SharingMethodInfo &other)
 {
-    Q_D(SharingMethodInfo);
-    d->displayName           = other.displayName();
-    d->subtitle              = other.subtitle();
-    d->methodId              = other.methodId();
-    d->methodIcon            = other.methodIcon();
-    d->accountId             = other.accountId();
-    d->shareUIPath           = other.shareUIPath();
-    d->capabilities          = other.capabilities();
-    d->supportsMultipleFiles = other.supportsMultipleFiles();
+    *d_ptr = *other.d_ptr;
     return *this;
 }
 
@@ -114,7 +85,7 @@ SharingMethodInfo &SharingMethodInfo::operator=(const SharingMethodInfo &other)
     Copies \a other to this instance.
 */
 SharingMethodInfo::SharingMethodInfo(const SharingMethodInfo &other):
-    d_ptr(new SharingMethodInfoPrivate(other.d_ptr))
+    d_ptr(new SharingMethodInfoPrivate(*other.d_ptr))
 {
 }
 

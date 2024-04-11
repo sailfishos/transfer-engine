@@ -102,7 +102,7 @@ Q_SIGNALS:
     void activeTransfersChanged();
 
 private:
-    TransferEnginePrivate *d_ptr;
+    TransferEnginePrivate *d_ptr = nullptr;
     Q_DECLARE_PRIVATE(TransferEngine)
 };
 

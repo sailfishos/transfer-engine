@@ -117,26 +117,26 @@ private:
 
     QString m_asyncErrorString;
     QVector<TransferDBRecord> m_asyncRows;
-    QVector<TransferDBRecord> *m_rows;
+    QVector<TransferDBRecord> *m_rows = nullptr;
     QHash<int, QByteArray> m_roles;
 
     QMutex m_mutex;
     QWaitCondition m_condition;
 
-    int m_rowsIndex;
-    int m_asyncIndex;
-    int m_asyncTransfersInProgress;
-    int m_transfersInProgress;
+    int m_rowsIndex = 0;
+    int m_asyncIndex = 0;
+    int m_asyncTransfersInProgress = 0;
+    int m_transfersInProgress = 0;
 
-    Status m_status;
-    Status m_asyncStatus;
-    bool m_asyncPending;
-    bool m_asyncRunning;
-    bool m_notified;
-    bool m_complete;
-    bool m_rowsChanges;
+    Status m_status = Null;
+    Status m_asyncStatus = Null;
+    bool m_asyncPending = false;
+    bool m_asyncRunning = false;
+    bool m_notified = false;
+    bool m_complete = false;
+    bool m_rowsChanges = false;
 
-    TransferEngineInterface *m_client;
+    TransferEngineInterface *m_client = nullptr;
 };
 
 #endif

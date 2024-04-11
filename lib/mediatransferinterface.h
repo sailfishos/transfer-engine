@@ -71,7 +71,7 @@ Q_SIGNALS:
     void progressUpdated(qreal progress);
 
 private:
-    MediaTransferInterfacePrivate *d_ptr;
+    MediaTransferInterfacePrivate *d_ptr = nullptr;
     Q_DECLARE_PRIVATE(MediaTransferInterface)
     friend class TransferEngine;
     friend class TransferEnginePrivate;

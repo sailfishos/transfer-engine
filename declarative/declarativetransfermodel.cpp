@@ -52,16 +52,6 @@ public:
 TransferModel::TransferModel(QObject *parent)
     : QAbstractListModel(parent)
     , m_rows(new QVector<TransferDBRecord>())
-    , m_rowsIndex(0)
-    , m_asyncIndex(0)
-    , m_transfersInProgress(0)
-    , m_status(Null)
-    , m_asyncStatus(Null)
-    , m_asyncPending(false)
-    , m_asyncRunning(false)
-    , m_notified(false)
-    , m_complete(false)
-    , m_rowsChanges(false)
 {
     setAutoDelete(false);
 }

@@ -78,7 +78,7 @@ public:
     bool supportsMultipleFiles() const;
 
 private:
-    SharingMethodInfoPrivate *d_ptr;
+    SharingMethodInfoPrivate *d_ptr = nullptr;
     Q_DECLARE_PRIVATE(SharingMethodInfo);
 };
 

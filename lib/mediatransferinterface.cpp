@@ -32,17 +32,10 @@
 class MediaTransferInterfacePrivate
 {
 public:
-    MediaTransferInterfacePrivate():
-        m_mediaItem(0),
-        m_status(MediaTransferInterface::NotStarted),
-        m_progress(0),
-        m_prevProgress(0)
-    {}
-
-    MediaItem *m_mediaItem;
-    MediaTransferInterface::TransferStatus m_status;
-    qreal m_progress;
-    qreal m_prevProgress;
+    MediaItem *m_mediaItem = nullptr;
+    MediaTransferInterface::TransferStatus m_status = MediaTransferInterface::NotStarted;
+    qreal m_progress = 0;
+    qreal m_prevProgress = 0;
 };
 
 
