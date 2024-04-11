@@ -324,11 +324,11 @@ void TransferModel::run()
 
             locker.relock();
 
-            m_asyncRows = rows;
+            m_asyncRows = std::move(rows);
             m_asyncTransfersInProgress = activeTransfers;
 
             if (!m_asyncPending) {
-                m_asyncErrorString = errorString;
+                m_asyncErrorString = std::move(errorString);
                 m_asyncStatus = ok ? Finished : Error;
             }
         } else {
