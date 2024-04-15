@@ -71,11 +71,11 @@ public:
 
 // TODO: Maybe this could use QVariantList internally to ease of pain of keeping thigs up to date
 //       when database structure / fields change
-    int     transfer_id;
-    int     transfer_type;
-    int     status;
-    qint64  size;
-    double  progress;
+    int     transfer_id = 0;
+    int     transfer_type = 0;
+    int     status = 0;
+    qint64  size = 0;
+    double  progress = 0;
     QString plugin_id;
     QString url;
     QString timestamp;
@@ -85,8 +85,8 @@ public:
     QString service_icon;
     QString application_icon;
     QString thumbnail_icon;
-    bool    cancel_supported;
-    bool    restart_supported;
+    bool    cancel_supported = false;
+    bool    restart_supported = false;
 };
 
 bool operator ==(const TransferDBRecord &left, const TransferDBRecord &right);

@@ -39,7 +39,7 @@ public:
     ~CallbackInterface();
 
 private:
-    CallbackInterfacePrivate *d_ptr;
+    CallbackInterfacePrivate *d_ptr = nullptr;
     Q_DECLARE_PRIVATE(CallbackInterface)
     friend class TransferEngineClient;
 };
@@ -85,7 +85,7 @@ private:
     bool notificationsEnabled() const;
 
 private:
-    TransferEngineClientPrivate *d_ptr;
+    TransferEngineClientPrivate *d_ptr = nullptr;
     Q_DECLARE_PRIVATE(TransferEngineClient)
 
     friend class DeclarativeTransferInterface;

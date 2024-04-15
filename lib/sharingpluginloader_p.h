@@ -57,10 +57,10 @@ private slots:
 private:
     static QStringList pluginList();
 
-    SharingPluginLoader *q_ptr;
+    SharingPluginLoader *q_ptr = nullptr;
     Q_DECLARE_PUBLIC(SharingPluginLoader)
 
-    bool m_loading;
+    bool m_loading = false;
     Accounts::Manager m_accountManager;
     QTimer m_fileWatcherTimer;
     QFileSystemWatcher m_fileWatcher;

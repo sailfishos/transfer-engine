@@ -99,7 +99,7 @@ CallbackInterface::~CallbackInterface()
 class TransferEngineClientPrivate
 {
 public:
-    TransferEngineInterface *m_client;    
+    TransferEngineInterface *m_client = nullptr;
 };
 
 /*!

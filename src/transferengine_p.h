@@ -68,12 +68,12 @@ public Q_SLOTS:
     void checkActivity();
 
 Q_SIGNALS:
-    void transfersExpired(QList<int> transferIds);
+    void transfersExpired(const QList<int> &transferIds);
 
 private:
     // Map for transferId, timestamps
     QMap<int, quint32> m_activityMap;
-    QTimer *m_timer;
+    QTimer *m_timer = nullptr;
 };
 
 class TransferEnginePrivate: QObject
@@ -125,10 +125,10 @@ public:
 private:
     QMap <MediaTransferInterface*, int> m_plugins;
     QMap <int, TransferEngineData::TransferType> m_keyTypeCache;
-    bool m_notificationsEnabled;
-    QTimer *m_delayedExitTimer;
-    ClientActivityMonitor *m_activityMonitor;
-    TransferEngine *q_ptr;
+    bool m_notificationsEnabled = false;
+    QTimer *m_delayedExitTimer = nullptr;
+    ClientActivityMonitor *m_activityMonitor = nullptr;
+    TransferEngine *q_ptr = nullptr;
     QVariantList m_defaultActions;
     QVariant m_showTransfersAction;
     Q_DECLARE_PUBLIC(TransferEngine)

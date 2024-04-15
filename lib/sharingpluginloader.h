@@ -46,7 +46,7 @@ signals:
     void pluginsLoaded();
 
 private:
-    SharingPluginLoaderPrivate *d_ptr;
+    SharingPluginLoaderPrivate *d_ptr = nullptr;
     Q_DECLARE_PRIVATE(SharingPluginLoader)
 };
 

@@ -163,7 +163,7 @@ private:
         }
     }
 
-    Agent * const agent;
+    Agent *const agent = nullptr;
     const CacheList &cache;
     int &c;
     const ReferenceList &reference;
