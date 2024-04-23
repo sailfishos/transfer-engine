@@ -39,7 +39,6 @@ public:
     ~DbManager();
 
     int createMetadataEntry(int key, const QString &title, const QString &description);
-
     QStringList callback(int key) const;
 
     int createCallbackEntry(int key,
@@ -50,38 +49,22 @@ public:
                             const QString &restartMethod);
 
     int createTransferEntry(const MediaItem *mediaItem);
-
     bool updateTransferStatus(int key, TransferEngineData::TransferStatus status);
-
     bool updateProgress(int key, qreal progress);
-
     bool removeTransfer(int key);
-
     bool clearFailedTransfers(int excludeKey, TransferEngineData::TransferType type);
-
     bool clearTransfer(int key);
-
     bool clearTransfers();
-
     int transferCount() const;
-
     int activeTransferCount() const;
-
     QList<TransferDBRecord> transfers() const;
-
     QList<TransferDBRecord> activeTransfers() const;
-
     TransferEngineData::TransferType transferType(int key) const;
-
     TransferEngineData::TransferStatus transferStatus(int key) const;
-
     qreal transferProgress(int key) const;
-
     int notificationId(int key);
     bool setNotificationId(int key, int notificationId);
-
     bool callbackMethods(int key, QString &cancelMethod, QString &restartMethod) const;
-
     MediaItem * mediaItem(int key) const;
 
 private:
