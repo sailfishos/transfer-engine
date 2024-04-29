@@ -103,8 +103,8 @@ Documentation for Sailfish Transfer Engine
 
 %build
 %qmake5 "VERSION=%{version}"
-make %{?_smp_mflags}
-make docs
+%make_build
+%make_build docs
 
 %install
 rm -rf %{buildroot}
