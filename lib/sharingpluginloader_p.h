@@ -31,6 +31,11 @@
 #include <QTimer>
 
 #include "sharingmethodinfo.h"
+#include "sharingcontenthints.h"
+#include "sharingplugininfo.h"
+#include "sharingplugininfov2.h"
+#include "sharingplugininterface.h"
+#include "sharingplugininterfacev2.h"
 
 class SharingPluginInfo;
 class SharingPluginLoader;
@@ -43,16 +48,18 @@ public:
     ~SharingPluginLoaderPrivate();
 
 public slots:
-    void load();
+    void query();
 
 signals:
     void pluginsChanged();
-    void pluginsLoaded();
+    void sharingMethodsInfoReady();
 
 private slots:
     void pluginDirChanged();
     void pluginInfoReady();
     void pluginInfoError(const QString &msg);
+    void pluginInfo2Ready();
+    void pluginInfo2Error(const QString &msg);
 
 private:
     static QStringList pluginList();
@@ -61,12 +68,14 @@ private:
     Q_DECLARE_PUBLIC(SharingPluginLoader)
 
     bool m_loading = false;
+    SharingContentHints m_hints;
     Accounts::Manager m_accountManager;
     QTimer m_fileWatcherTimer;
     QFileSystemWatcher m_fileWatcher;
 
     QList<SharingPluginInfo *> m_infoObjects;
-    QList<SharingMethodInfo> m_plugins;
+    QList<SharingPluginInfoV2 *> m_infoObjects2;
+    QList<SharingMethodInfo> m_sharingMethods;
 };
 
 #endif // TRANSFERPLUGINLOADER_P_H

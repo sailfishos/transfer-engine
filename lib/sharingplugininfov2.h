@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2013 - 2019 Jolla Ltd.
  * Copyright (c) 2021 Open Mobile Platform LLC.
  *
  * All rights reserved.
@@ -22,35 +23,26 @@
  * Lesser General Public License for more details.
  */
 
-#ifndef TRANSFERPLUGINLOADER_H
-#define TRANSFERPLUGINLOADER_H
+#ifndef SHARINGPLUGININFOV2_H
+#define SHARINGPLUGININFOV2_H
 
 #include <QObject>
-
 #include "sharingmethodinfo.h"
 #include "sharingcontenthints.h"
 
-class SharingPluginLoaderPrivate;
-class SharingPluginLoader : public QObject
+class SharingPluginInfoV2: public QObject
 {
     Q_OBJECT
-
 public:
-    explicit SharingPluginLoader(QObject *parent = nullptr);
-    ~SharingPluginLoader();
+    virtual QList<SharingMethodInfo> info() const = 0;
+    // start query for sharing methods. contentHints contain information on content
+    // about to be shared and can be used to limit what sharing methods are returned.
+    virtual void query(const SharingContentHints &contentHints) = 0;
+    virtual void cancelQuery() = 0;
 
-    const QList<SharingMethodInfo> &sharingMethods() const;
-
-    void querySharingMethods(const SharingContentHints &hints);
-    bool isSharingMethodsInfoReady() const;
-
-signals:
-    void pluginsChanged();
-    void sharingMethodsInfoReady();
-
-private:
-    SharingPluginLoaderPrivate *d_ptr = nullptr;
-    Q_DECLARE_PRIVATE(SharingPluginLoader)
+Q_SIGNALS:
+    void infoReady();
+    void infoError(const QString &msg);
 };
 
-#endif // TRANSFERPLUGINLOADER_H
+#endif // SHARINGPLUGININFOV2_H

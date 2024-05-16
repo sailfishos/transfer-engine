@@ -19,7 +19,10 @@ PUBLIC_HEADERS += \
     mediaitem.h \
     sharingmethodinfo.h \
     sharingplugininfo.h \
+    sharingplugininfov2.h \
+    sharingcontenthints.h \
     sharingplugininterface.h \
+    sharingplugininterfacev2.h \
     sharingpluginloader.h \
     transferengineclient.h \
     imageoperation.h
@@ -32,7 +35,7 @@ SOURCES += \
     mediatransferinterface.cpp \
     mediaitem.cpp \
     sharingmethodinfo.cpp \
-    sharingplugininfo.cpp \
+    sharingcontenthints.cpp \
     sharingpluginloader.cpp \
     transferengineclient.cpp \
     imageoperation.cpp
