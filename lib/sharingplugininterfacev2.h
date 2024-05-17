@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 - 2021 Open Mobile Platform LLC.
+ * Copyright (c) 2021 Open Mobile Platform LLC.
  *
  * All rights reserved.
  *
@@ -22,4 +22,19 @@
  * Lesser General Public License for more details.
  */
 
-#include "sharingplugininfo.h"
+#ifndef SHARINGPLUGININTERFACEV2_H
+#define SHARINGPLUGININTERFACEV2_H
+
+#include <QtPlugin>
+#include "sharingplugininfov2.h"
+
+class SharingPluginInterfaceV2
+{
+public:
+    virtual SharingPluginInfoV2 *infoObject() = 0;
+
+    virtual QString pluginId() const = 0;
+};
+
+Q_DECLARE_INTERFACE(SharingPluginInterfaceV2, "org.sailfishos.SharingPluginInterfaceV2/1.0")
+#endif // SHARINGPLUGININTERFACEV2_H

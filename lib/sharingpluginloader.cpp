@@ -27,8 +27,6 @@
 #include <QPluginLoader>
 #include <QString>
 
-#include "sharingplugininfo.h"
-#include "sharingplugininterface.h"
 #include "sharingpluginloader_p.h"
 #include "sharingpluginloader.h"
 
@@ -64,6 +62,7 @@ SharingPluginLoaderPrivate::SharingPluginLoaderPrivate(SharingPluginLoader *pare
 SharingPluginLoaderPrivate::~SharingPluginLoaderPrivate()
 {
     qDeleteAll(m_infoObjects);
+    qDeleteAll(m_infoObjects2);
 }
 
 QStringList SharingPluginLoaderPrivate::pluginList()
@@ -75,7 +74,7 @@ QStringList SharingPluginLoaderPrivate::pluginList()
     return paths;
 }
 
-void SharingPluginLoaderPrivate::load()
+void SharingPluginLoaderPrivate::query()
 {
     if (m_fileWatcherTimer.isActive())
         m_fileWatcherTimer.stop();
@@ -87,34 +86,55 @@ void SharingPluginLoaderPrivate::load()
 
     qDeleteAll(m_infoObjects);
     m_infoObjects.clear();
-    m_plugins.clear();
+    qDeleteAll(m_infoObjects2);
+    m_infoObjects2.clear();
+
+    m_sharingMethods.clear();
 
     for (const QString &plugin : pluginList()) {
         loader.setFileName(plugin);
+
+        SharingPluginInterfaceV2 *interfaceV2 = qobject_cast<SharingPluginInterfaceV2 *>(loader.instance());
+        if (interfaceV2) {
+            SharingPluginInfoV2 *infoV2 = interfaceV2->infoObject();
+            if (!infoV2) {
+                qWarning() << Q_FUNC_INFO << "NULL Info object!";
+                continue;
+            }
+
+            m_infoObjects2 << infoV2;
+            connect(infoV2, &SharingPluginInfoV2::infoReady,
+                    this, &SharingPluginLoaderPrivate::pluginInfo2Ready);
+            connect(infoV2, &SharingPluginInfoV2::infoError,
+                    this, &SharingPluginLoaderPrivate::pluginInfo2Error);
+            infoV2->query(m_hints);
+            continue;
+        }
+
         SharingPluginInterface *interface = qobject_cast<SharingPluginInterface *>(loader.instance());
 
-        if (!interface) {
-            qWarning() << Q_FUNC_INFO << loader.errorString();
-        } else {
+        if (interface) {
             SharingPluginInfo *info = interface->infoObject();
             if (!info) {
                 qWarning() << Q_FUNC_INFO << "NULL Info object!";
                 continue;
             }
 
-            /* Calling queue() should trigger one of these signals */
             m_infoObjects << info;
             connect(info, &SharingPluginInfo::infoReady,
                     this, &SharingPluginLoaderPrivate::pluginInfoReady);
             connect(info, &SharingPluginInfo::infoError,
                     this, &SharingPluginLoaderPrivate::pluginInfoError);
             info->query();
+            continue;
         }
+
+        qWarning() << Q_FUNC_INFO << loader.errorString();
     }
 
     m_loading = false;
-    if (m_infoObjects.isEmpty())
-        emit pluginsLoaded();
+    if (m_infoObjects.isEmpty() && m_infoObjects2.isEmpty())
+        emit sharingMethodsInfoReady();
 }
 
 void SharingPluginLoaderPrivate::pluginDirChanged()
@@ -127,15 +147,15 @@ void SharingPluginLoaderPrivate::pluginInfoReady()
     SharingPluginInfo *info = qobject_cast<SharingPluginInfo *>(sender());
 
     if (info->info().count() > 0)
-        m_plugins << info->info();
+        m_sharingMethods << info->info();
 
     if (!m_infoObjects.removeOne(info))
         qWarning() << Q_FUNC_INFO << "Failed to remove info object!";
 
     delete info;
 
-    if (!m_loading && m_infoObjects.isEmpty())
-        emit pluginsLoaded();
+    if (!m_loading && m_infoObjects.isEmpty() && m_infoObjects2.isEmpty())
+        emit sharingMethodsInfoReady();
 }
 
 void SharingPluginLoaderPrivate::pluginInfoError(const QString &msg)
@@ -147,7 +167,36 @@ void SharingPluginLoaderPrivate::pluginInfoError(const QString &msg)
     info->deleteLater();
 
     if (!m_loading && m_infoObjects.isEmpty())
-        emit pluginsLoaded();
+        emit sharingMethodsInfoReady();
+}
+
+void SharingPluginLoaderPrivate::pluginInfo2Ready()
+{
+    SharingPluginInfoV2 *info = qobject_cast<SharingPluginInfoV2 *>(sender());
+
+    if (info->info().count() > 0)
+        m_sharingMethods << info->info();
+
+    if (!m_infoObjects2.removeOne(info))
+        qWarning() << Q_FUNC_INFO << "Failed to remove info object!";
+
+    delete info;
+
+    if (!m_loading && m_infoObjects.isEmpty() && m_infoObjects2.isEmpty())
+        emit sharingMethodsInfoReady();
+}
+
+void SharingPluginLoaderPrivate::pluginInfo2Error(const QString &msg)
+{
+    qWarning() << Q_FUNC_INFO << msg;
+    SharingPluginInfoV2 *info = qobject_cast<SharingPluginInfoV2 *>(sender());
+    m_infoObjects2.removeOne(info);
+
+    info->deleteLater();
+
+    if (!m_loading && m_infoObjects.isEmpty())
+        emit sharingMethodsInfoReady();
+
 }
 
 SharingPluginLoader::SharingPluginLoader(QObject *parent)
@@ -157,9 +206,8 @@ SharingPluginLoader::SharingPluginLoader(QObject *parent)
     Q_D(SharingPluginLoader);
     connect(d, &SharingPluginLoaderPrivate::pluginsChanged,
             this, &SharingPluginLoader::pluginsChanged);
-    connect(d, &SharingPluginLoaderPrivate::pluginsLoaded,
-            this, &SharingPluginLoader::pluginsLoaded);
-    QMetaObject::invokeMethod(d, "load", Qt::QueuedConnection);
+    connect(d, &SharingPluginLoaderPrivate::sharingMethodsInfoReady,
+            this, &SharingPluginLoader::sharingMethodsInfoReady);
 }
 
 SharingPluginLoader::~SharingPluginLoader()
@@ -167,34 +215,35 @@ SharingPluginLoader::~SharingPluginLoader()
 }
 
 /*!
-    Returns list of installed sharing plugins.
+    Returns list of sharing methods.
  */
-const QList<SharingMethodInfo> &SharingPluginLoader::plugins() const
+const QList<SharingMethodInfo> &SharingPluginLoader::sharingMethods() const
 {
     Q_D(const SharingPluginLoader);
-    return d->m_plugins;
+    return d->m_sharingMethods;
 }
 
 /*
-   Reload sharing plugins.
+   Request sharing methods.
 
    Call this after receiving SharingPluginLoader::pluginsChanged to
-   reload plugins.
+   reload plugins, or when needing methods matching a new query.
  */
-void SharingPluginLoader::reload()
+void SharingPluginLoader::querySharingMethods(const SharingContentHints &hints)
 {
     Q_D(SharingPluginLoader);
-    QMetaObject::invokeMethod(d, "load", Qt::QueuedConnection);
+    d->m_hints = hints;
+    QMetaObject::invokeMethod(d, "query", Qt::QueuedConnection);
 }
 
 /*
-   Returns whether all plugins have been loaded.
+   Returns whether sharing method queries are done
 
    Plugins are loaded asynchronously, thus this may return false after
-   construction or reload(). After all plugins have been loaded, i.e.
-   SharingPluginLoader::pluginsLoaded is signaled, this returns true.
+   construction or querySharingMethods(). After all plugins have processed queries, i.e.
+   SharingPluginLoader::isSharingMethodsInfoReady is signaled, this returns true.
  */
-bool SharingPluginLoader::loaded() const
+bool SharingPluginLoader::isSharingMethodsInfoReady() const
 {
     Q_D(const SharingPluginLoader);
     return !d->m_loading && d->m_infoObjects.isEmpty();
